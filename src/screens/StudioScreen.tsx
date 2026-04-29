@@ -7,10 +7,18 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store';
 import { releaseTrack, gainXP, updateReputation, gainMoney } from '../store/playerSlice';
-import { advanceTime } from '../store/gameSlice';
+import { advanceTime, triggerVictory } from '../store/gameSlice';
 import { REGIONS } from '../data/regions';
-import { MusicGenre } from '../types';
+import { MusicGenre, CERT_THRESHOLDS } from '../types';
 import { calculateTrackQuality, projectInitialStreams, calculateRepGain, calculateTrackXP } from '../utils/gameEngine';
+
+function getCertLevel(streams: number) {
+  if (streams >= CERT_THRESHOLDS.diamond) return 'diamond' as const;
+  if (streams >= CERT_THRESHOLDS.multi_platinum) return 'multi_platinum' as const;
+  if (streams >= CERT_THRESHOLDS.platinum) return 'platinum' as const;
+  if (streams >= CERT_THRESHOLDS.gold) return 'gold' as const;
+  return 'none' as const;
+}
 
 const GENRE_EMOJIS: Partial<Record<MusicGenre, string>> = {
   'Afrobeats': '🥁', 'Amapiano': '🎹', 'K-Pop': '✨', 'Hip-Hop': '🎤',
@@ -22,7 +30,7 @@ const GENRE_EMOJIS: Partial<Record<MusicGenre, string>> = {
 export default function StudioScreen() {
   const dispatch = useDispatch();
   const player = useSelector((s: RootState) => s.player.data);
-  const { currentRegionId } = useSelector((s: RootState) => s.game);
+  const { currentRegionId, winConditionMet } = useSelector((s: RootState) => s.game);
   const region = REGIONS.find((r) => r.id === currentRegionId);
 
   const [trackTitle, setTrackTitle] = useState('');
@@ -50,13 +58,19 @@ export default function StudioScreen() {
     const xpGain = calculateTrackXP(quality, streams);
     const earnings = Math.floor(streams * 0.004);
 
+    const trackId = Date.now().toString();
+    const cert = getCertLevel(streams);
+
     dispatch(releaseTrack({
-      id: Date.now().toString(),
+      id: trackId,
       title: trackTitle.trim(),
       genre: selectedGenre,
       regionId: currentRegionId,
       qualityScore: quality,
       streams,
+      certification: cert,
+      hasVideo: false,
+      videoViews: 0,
       releaseDate: Date.now(),
       collaborators: [],
       reputationGained: { [currentRegionId]: repGain },
@@ -64,15 +78,21 @@ export default function StudioScreen() {
     dispatch(gainXP(xpGain));
     dispatch(updateReputation({ regionId: currentRegionId, amount: repGain }));
     dispatch(gainMoney(earnings));
-    dispatch(advanceTime(3)); // takes 3 in-game days
+    dispatch(advanceTime(3));
+
+    // Artist path win condition: first Diamond track triggers victory
+    if (cert === 'diamond' && !winConditionMet && player?.careerPath === 'artist') {
+      dispatch(triggerVictory({ artistId: trackId }));
+    }
 
     setRecording(false);
     setTrackTitle('');
     setSelectedGenre(null);
 
+    const certMsg = cert !== 'none' ? `\n🎖️ Certified ${cert.replace('_', ' ').toUpperCase()}!` : '';
     Alert.alert(
       `"${trackTitle}" Released!`,
-      `Quality: ${quality}/100\nStreams: ${streams.toLocaleString()}\nRep gained: +${repGain}\nXP: +${xpGain}\nEarnings: $${earnings.toLocaleString()}`,
+      `Quality: ${quality}/100\nStreams: ${streams.toLocaleString()}\nRep gained: +${repGain}\nXP: +${xpGain}\nEarnings: $${earnings.toLocaleString()}${certMsg}`,
       [{ text: 'LFG 🔥', style: 'default' }]
     );
   }
@@ -185,24 +205,4 @@ const styles = StyleSheet.create({
   genreChip: {
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: '#111', borderWidth: 1, borderColor: '#222',
-    borderRadius: 20, paddingVertical: 8, paddingHorizontal: 14, gap: 6,
-  },
-  genreEmoji: { fontSize: 14 },
-  genreText: { fontSize: 13, color: '#888' },
-  genreTextSelected: { color: '#000', fontWeight: '700' },
-  trackRow: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#111', borderRadius: 8,
-    padding: 12, marginBottom: 6, gap: 8,
-  },
-  trackTitle: { flex: 1, color: '#fff', fontSize: 13, fontWeight: '600' },
-  trackGenre: { color: '#555', fontSize: 11 },
-  trackStreams: { color: '#888', fontSize: 11 },
-  trackQuality: { fontSize: 12, fontWeight: '700', width: 42, textAlign: 'right' },
-  recordButton: {
-    marginTop: 32, paddingVertical: 18,
-    backgroundColor: '#1DB954', borderRadius: 12, alignItems: 'center',
-  },
-  recordButtonDisabled: { backgroundColor: '#0d5c2a' },
-  recordButtonText: { color: '#000', fontSize: 16, fontWeight: '800', letterSpacing: 1 },
-});
+    borderRadius: 20, paddingVertical: 8, paddingHor
