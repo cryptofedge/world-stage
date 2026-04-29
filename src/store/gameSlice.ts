@@ -1,23 +1,29 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { GamePhase, GameSettings, Quest } from '../types';
+import { GamePhase, GameSettings, Quest, CareerPath } from '../types';
 
 interface GameSliceState {
   phase: GamePhase;
+  careerPath: CareerPath | null;
   currentRegionId: string;
   unlockedRegions: string[];
   activeQuests: Quest[];
   completedQuests: string[];
-  gameTime: number; // in-game days
+  gameTime: number;
   settings: GameSettings;
+  winConditionMet: boolean;
+  diamondArtistId: string | null;
 }
 
 const initialState: GameSliceState = {
   phase: 'main_menu',
+  careerPath: null,
   currentRegionId: 'lagos',
   unlockedRegions: ['lagos'],
   activeQuests: [],
   completedQuests: [],
   gameTime: 0,
+  winConditionMet: false,
+  diamondArtistId: null,
   settings: {
     musicVolume: 0.8,
     sfxVolume: 0.9,
@@ -34,13 +40,20 @@ const gameSlice = createSlice({
       state.phase = action.payload;
     },
 
+    setCareerPath: (state, action: PayloadAction<CareerPath>) => {
+      state.careerPath = action.payload;
+    },
+
     startNewGame: (state) => {
-      state.phase = 'character_creation';
+      state.phase = 'path_selection';
+      state.careerPath = null;
       state.currentRegionId = 'lagos';
       state.unlockedRegions = ['lagos'];
       state.activeQuests = [];
       state.completedQuests = [];
       state.gameTime = 0;
+      state.winConditionMet = false;
+      state.diamondArtistId = null;
     },
 
     unlockRegion: (state, action: PayloadAction<string>) => {
@@ -51,12 +64,11 @@ const gameSlice = createSlice({
 
     travelToRegion: (state, action: PayloadAction<string>) => {
       state.currentRegionId = action.payload;
-      state.gameTime += 1; // travel costs 1 day
+      state.gameTime += 1;
     },
 
     startQuest: (state, action: PayloadAction<Quest>) => {
-      const exists = state.activeQuests.find((q) => q.id === action.payload.id);
-      if (!exists) {
+      if (!state.activeQuests.find((q) => q.id === action.payload.id)) {
         state.activeQuests.push({ ...action.payload, status: 'active' });
       }
     },
@@ -80,26 +92,6 @@ const gameSlice = createSlice({
       }
     },
 
-    advanceTime: (state, action: PayloadAction<number>) => {
-      state.gameTime += action.payload;
-    },
-
-    updateSettings: (state, action: PayloadAction<Partial<GameSettings>>) => {
-      state.settings = { ...state.settings, ...action.payload };
-    },
-  },
-});
-
-export const {
-  setPhase,
-  startNewGame,
-  unlockRegion,
-  travelToRegion,
-  startQuest,
-  updateQuestObjective,
-  completeQuest,
-  advanceTime,
-  updateSettings,
-} = gameSlice.actions;
-
-export default gameSlice.reducer;
+    triggerVictory: (state, action: PayloadAction<{ artistId: string }>) => {
+      state.winConditionMet = true;
+      state.diamondArtistId = action.payload.artistI
