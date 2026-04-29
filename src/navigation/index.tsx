@@ -17,6 +17,8 @@ import ProfileScreen from '../screens/ProfileScreen';
 import HustleScreen from '../screens/HustleScreen';
 import ImageScreen from '../screens/ImageScreen';
 import TourScreen from '../screens/TourScreen';
+import VictoryScreen from '../screens/VictoryScreen';
+import LabelDashboardScreen from '../screens/LabelDashboardScreen';
 
 export type RootStackParamList = {
   MainMenu: undefined;
@@ -30,6 +32,7 @@ export type RootStackParamList = {
 export type TabParamList = {
   WorldMap: undefined;
   Hustle: undefined;
+  Label: undefined;
   Image: undefined;
   Studio: undefined;
   Tour: undefined;
@@ -43,6 +46,7 @@ const Tab = createBottomTabNavigator<TabParamList>();
 const TAB_ICON: Record<string, string> = {
   WorldMap: '🌍',
   Hustle: '💼',
+  Label: '🏢',
   Image: '🎨',
   Studio: '🎙️',
   Tour: '🚌',
@@ -53,19 +57,15 @@ const TAB_ICON: Record<string, string> = {
 function GameTabs() {
   const player = useSelector((s: RootState) => s.player.data);
   const phase = player?.artistPhase ?? 'origins';
+  const careerPath = player?.careerPath ?? 'artist';
 
-  // Show tabs relevant to current phase
-  const showImage = ['image', 'pre_production', 'recording', 'distribution', 'promotion', 'touring', 'certified'].includes(phase);
-  const showStudio = ['pre_production', 'recording', 'distribution', 'promotion', 'touring', 'certified'].includes(phase);
-  const showTour = ['touring', 'certified'].includes(phase);
+  // Artist path: phase-gated tabs
+  const showImage = careerPath === 'artist' && ['image', 'pre_production', 'recording', 'distribution', 'promotion', 'touring', 'certified'].includes(phase);
+  const showStudio = careerPath === 'artist' && ['pre_production', 'recording', 'distribution', 'promotion', 'touring', 'certified'].includes(phase);
+  const showTour = careerPath === 'artist' && ['touring', 'certified'].includes(phase);
+
+  // Label path: always show Label tab instead of artist-specific tabs
+  const showLabel = careerPath === 'label';
 
   return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        headerShown: false,
-        tabBarStyle: { backgroundColor: '#0a0a1a', borderTopColor: '#1a1a2e' },
-        tabBarActiveTintColor: '#1DB954',
-        tabBarInactiveTintColor: '#444',
-        tabBarLabel: ({ color }) => (
-          <Text style={{ color, fontSize: 9, letterSpacing: 0.5 }}>
-            {route.name === 'WorldMap' ? 'WORLD' : r
+    
