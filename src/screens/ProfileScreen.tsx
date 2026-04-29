@@ -12,6 +12,8 @@ const STAT_COLORS: Record<string, string> = {
   business: '#6C63FF',
   production: '#FF6B8A',
   globalReach: '#00D4FF',
+  hustle: '#FF6B35',
+  image: '#E91E8C',
 };
 
 const STAT_LABELS: Record<string, string> = {
@@ -20,6 +22,8 @@ const STAT_LABELS: Record<string, string> = {
   business: 'Business',
   production: 'Production',
   globalReach: 'Global Reach',
+  hustle: 'Hustle',
+  image: 'Image',
 };
 
 export default function ProfileScreen() {
@@ -81,7 +85,7 @@ export default function ProfileScreen() {
         </View>
 
         {/* Stats */}
-        <Text style={styles.sectionLabel}>ARTIST STATS</Text>
+        <Text style={styles.sectionLabel}>{player.careerPath === 'label' ? 'EXECUTIVE STATS' : 'ARTIST STATS'}</Text>
         <View style={styles.statsCard}>
           {Object.entries(player.stats).map(([key, value]) => (
             <View key={key} style={styles.statRow}>
@@ -217,8 +221,4 @@ const styles = StyleSheet.create({
   relAffinity: { width: 32, fontSize: 12, color: '#555', textAlign: 'right' },
   achievementsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
   achievementChip: {
-    backgroundColor: '#1a1a0a', borderWidth: 1, borderColor: '#F5A62344',
-    paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8,
-  },
-  achievementText: { fontSize: 12, color: '#F5A623' },
-});
+    backgroundColor: '#1a1a0a', borderWidth: 1, borderColor: '#F5A6
