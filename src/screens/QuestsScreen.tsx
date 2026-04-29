@@ -6,7 +6,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store';
-import { startQuest, completeQuest, updateQuestObjective } from '../store/gameSlice';
+import { startQuest, completeQuest, updateQuestObjective, unlockRegion } from '../store/gameSlice';
 import { gainXP, gainMoney, updateStats, unlockAchievement, updateReputation } from '../store/playerSlice';
 import { QUESTS } from '../data/quests';
 import { Quest } from '../types';
@@ -72,7 +72,7 @@ export default function QuestsScreen() {
             dispatch(gainMoney(quest.rewards.money));
             if (quest.rewards.statBoosts) dispatch(updateStats(quest.rewards.statBoosts));
             if (quest.rewards.unlockRegion) {
-              // Unlock region via game slice (import if needed)
+              dispatch(unlockRegion(quest.rewards.unlockRegion));
             }
             dispatch(unlockAchievement(`quest_${quest.id}`));
             Alert.alert(
@@ -236,5 +236,4 @@ const styles = StyleSheet.create({
   rewardItem: { fontSize: 11, color: '#888', backgroundColor: '#1a1a1a', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 4 },
   actionBtn: { paddingVertical: 12, borderRadius: 8, alignItems: 'center' },
   actionBtnText: { fontSize: 13, fontWeight: '800', color: '#000', letterSpacing: 1 },
-  actionRow: { flexDirection: 'row' },
-});
+  actionRow: { flexDirection
