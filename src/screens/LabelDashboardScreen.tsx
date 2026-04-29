@@ -8,9 +8,11 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store';
 import {
   gainMoney, gainXP, updateStats, updateNpcAffinity,
-  advanceArtistPhase,
 } from '../store/playerSlice';
-import { advanceTime, unlockRegion, triggerVictory } from '../store/gameSlice';
+import { advanceTime, triggerVictory } from '../store/gameSlice';
+import {
+  signArtistToLabel, addStreamsToRosterArtist, RosterArtist, getCertForStreams,
+} from '../store/labelSlice';
 
 // ─── Unsigned talent pool ────────────────────────────────────────────────────
 
@@ -123,29 +125,7 @@ const DEV_ACTIONS: DevAction[] = [
   },
 ];
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface SignedArtistRecord {
-  id: string;
-  name: string;
-  genre: string;
-  region: string;
-  potential: number;
-  emoji: string;
-  streams: number;
-  advancePaid: number;
-  royaltyRate: number;
-  signedAt: number; // timestamp
-  certification: 'none' | 'gold' | 'platinum' | 'multi_platinum' | 'diamond';
-}
-
-function getCert(streams: number): SignedArtistRecord['certification'] {
-  if (streams >= 1_500_000_000) return 'diamond';
-  if (streams >= 300_000_000) return 'multi_platinum';
-  if (streams >= 150_000_000) return 'platinum';
-  if (streams >= 75_000_000) return 'gold';
-  return 'none';
-}
+// ─── Constants ────────────────────────────────────────────────────────────────
 
 const CERT_COLOR: Record<string, string> = {
   none: '#555', gold: '#F5A623', platinum: '#aaa',
@@ -165,9 +145,10 @@ export default function LabelDashboardScreen() {
   const dispatch = useDispatch();
   const player = useSelector((s: RootState) => s.player.data);
   const game = useSelector((s: RootState) => s.game);
+  // ✅ Roster now lives in Redux (persists across tab switches)
+  const roster = useSelector((s: RootState) => s.label.roster);
 
   const [tab, setTab] = useState<Tab>('roster');
-  const [roster, setRoster] = useState<SignedArtistRecord[]>([]);
   const [selectedArtistId, setSelectedArtistId] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
 
@@ -198,7 +179,8 @@ export default function LabelDashboardScreen() {
           onPress: () => {
             dispatch(gainMoney(-prospect.askingAdvance));
             dispatch(gainXP(150));
-            const newArtist: SignedArtistRecord = {
+            // ✅ Dispatch to Redux — roster survives tab navigation
+            const newArtist: RosterArtist = {
               id: prospect.id,
               name: prospect.name,
               genre: prospect.genre,
@@ -209,9 +191,9 @@ export default function LabelDashboardScreen() {
               advancePaid: prospect.askingAdvance,
               royaltyRate: prospect.weeklyRoyalty,
               signedAt: Date.now(),
-              certification: getCert(prospect.currentStreams),
+              certification: getCertForStreams(prospect.currentStreams),
             };
-            setRoster((prev) => [...prev, newArtist]);
+            dispatch(signArtistToLabel(newArtist));
             dispatch(updateNpcAffinity({ npcId: prospect.id, change: 30 }));
             setTab('roster');
             Alert.alert('✅ Signed!', `${prospect.name} is now on your label.`);
@@ -242,7 +224,7 @@ export default function LabelDashboardScreen() {
 
             const variance = 0.6 + Math.random() * 0.8 + (selectedArtist.potential / 10) * 0.4;
             const earned = Math.round(action.streamsGain * variance);
-            const royaltyRevenue = Math.round(earned * (selectedArtist.royaltyRate / 100) * 0.004); // $0.004 per stream * label's cut
+            const royaltyRevenue = Math.round(earned * (selectedArtist.royaltyRate / 100) * 0.004);
 
             dispatch(gainMoney(-action.cost));
             dispatch(gainMoney(royaltyRevenue));
@@ -250,27 +232,29 @@ export default function LabelDashboardScreen() {
             dispatch(updateStats({ business: 1, globalReach: Math.ceil(earned / 5_000_000) }));
             dispatch(advanceTime(action.duration));
 
-            // Update artist streams
-            setRoster((prev) => prev.map((a) => {
-              if (a.id !== selectedArtist.id) return a;
-              const newStreams = a.streams + earned;
-              const newCert = getCert(newStreams);
-
-              // Check for diamond win condition
-              if (newCert === 'diamond' && a.certification !== 'diamond') {
-                setTimeout(() => {
-                  dispatch(triggerVictory({ artistId: a.id }));
-                }, 500);
-              }
-
-              return { ...a, streams: newStreams, certification: newCert };
+            // ✅ Update artist streams in Redux
+            const prevCert = selectedArtist.certification;
+            dispatch(addStreamsToRosterArtist({
+              artistId: selectedArtist.id,
+              streams: earned,
+              royaltyRevenue,
             }));
+
+            // Check diamond win condition AFTER dispatch (check new cert)
+            const newStreams = selectedArtist.streams + earned;
+            const newCert = getCertForStreams(newStreams);
+            if (newCert === 'diamond' && prevCert !== 'diamond' && !game.winConditionMet) {
+              setTimeout(() => dispatch(triggerVictory({ artistId: selectedArtist.id })), 600);
+            }
 
             setWorking(false);
 
+            const certMsg = newCert !== prevCert && newCert !== 'none'
+              ? `\n🎖️ ${selectedArtist.name} is now ${newCert.replace('_', ' ').toUpperCase()}!`
+              : '';
             Alert.alert(
               `${action.emoji} Done!`,
-              `${selectedArtist.name} gained ${earned.toLocaleString()} streams.\nYour label earned $${royaltyRevenue.toLocaleString()} in royalties.`,
+              `${selectedArtist.name} gained ${earned.toLocaleString()} streams.\nYour label earned $${royaltyRevenue.toLocaleString()} in royalties.${certMsg}`,
               [{ text: '🔥', style: 'default' }]
             );
           },
@@ -707,3 +691,4 @@ const styles = StyleSheet.create({
   devBtnText: { fontSize: 12, fontWeight: '900', color: '#fff', letterSpacing: 1 },
   devPickHint: { textAlign: 'center', color: '#444', fontSize: 13, marginTop: 24 },
 });
+                                                                                                                                                        
