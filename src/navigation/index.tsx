@@ -3,27 +3,36 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSelector } from 'react-redux';
+import { Text } from 'react-native';
 import { RootState } from '../store';
 
-// Screens
 import MainMenuScreen from '../screens/MainMenuScreen';
+import PathSelectionScreen from '../screens/PathSelectionScreen';
 import CharacterCreationScreen from '../screens/CharacterCreationScreen';
 import WorldMapScreen from '../screens/WorldMapScreen';
 import RegionScreen from '../screens/RegionScreen';
 import StudioScreen from '../screens/StudioScreen';
 import QuestsScreen from '../screens/QuestsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import HustleScreen from '../screens/HustleScreen';
+import ImageScreen from '../screens/ImageScreen';
+import TourScreen from '../screens/TourScreen';
 
 export type RootStackParamList = {
   MainMenu: undefined;
+  PathSelection: undefined;
   CharacterCreation: undefined;
   Game: undefined;
   Region: { regionId: string };
+  Victory: undefined;
 };
 
 export type TabParamList = {
   WorldMap: undefined;
+  Hustle: undefined;
+  Image: undefined;
   Studio: undefined;
+  Tour: undefined;
   Quests: undefined;
   Profile: undefined;
 };
@@ -31,46 +40,32 @@ export type TabParamList = {
 const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
+const TAB_ICON: Record<string, string> = {
+  WorldMap: '🌍',
+  Hustle: '💼',
+  Image: '🎨',
+  Studio: '🎙️',
+  Tour: '🚌',
+  Quests: '🎯',
+  Profile: '👤',
+};
+
 function GameTabs() {
+  const player = useSelector((s: RootState) => s.player.data);
+  const phase = player?.artistPhase ?? 'origins';
+
+  // Show tabs relevant to current phase
+  const showImage = ['image', 'pre_production', 'recording', 'distribution', 'promotion', 'touring', 'certified'].includes(phase);
+  const showStudio = ['pre_production', 'recording', 'distribution', 'promotion', 'touring', 'certified'].includes(phase);
+  const showTour = ['touring', 'certified'].includes(phase);
+
   return (
     <Tab.Navigator
-      screenOptions={{
+      screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarStyle: {
-          backgroundColor: '#0a0a1a',
-          borderTopColor: '#1a1a2e',
-        },
+        tabBarStyle: { backgroundColor: '#0a0a1a', borderTopColor: '#1a1a2e' },
         tabBarActiveTintColor: '#1DB954',
-        tabBarInactiveTintColor: '#555',
-      }}
-    >
-      <Tab.Screen name="WorldMap" component={WorldMapScreen} options={{ title: 'World' }} />
-      <Tab.Screen name="Studio" component={StudioScreen} options={{ title: 'Studio' }} />
-      <Tab.Screen name="Quests" component={QuestsScreen} options={{ title: 'Quests' }} />
-      <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: 'Artist' }} />
-    </Tab.Navigator>
-  );
-}
-
-export default function AppNavigator() {
-  const phase = useSelector((state: RootState) => state.game.phase);
-
-  return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {phase === 'main_menu' && (
-          <Stack.Screen name="MainMenu" component={MainMenuScreen} />
-        )}
-        {phase === 'character_creation' && (
-          <Stack.Screen name="CharacterCreation" component={CharacterCreationScreen} />
-        )}
-        {(phase === 'playing') && (
-          <>
-            <Stack.Screen name="Game" component={GameTabs} />
-            <Stack.Screen name="Region" component={RegionScreen} />
-          </>
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
-}
+        tabBarInactiveTintColor: '#444',
+        tabBarLabel: ({ color }) => (
+          <Text style={{ color, fontSize: 9, letterSpacing: 0.5 }}>
+            {route.name === 'WorldMap' ? 'WORLD' : r
