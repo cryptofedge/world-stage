@@ -1,40 +1,83 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Player, PlayerStats, Track, Equipment, Contract, Quest } from '../types';
+import {
+  Player, PlayerStats, Track, Equipment, Contract,
+  WardrobeItem, ArtistPhase, SocialPlatform, ArtistAesthetic,
+  CERT_THRESHOLDS, CertificationLevel,
+} from '../types';
 
 interface PlayerState {
   data: Player | null;
 }
 
-const initialState: PlayerState = {
-  data: null,
+const initialState: PlayerState = { data: null };
+
+const DEFAULT_IMAGE_PROFILE = {
+  completed: false,
+  aesthetic: null,
+  wardrobeScore: 0,
+  photoshootDone: false,
+  pressPhotoUrl: null,
+  socialSetup: false,
+  brandColors: [],
+  stylistHired: false,
+  imageScore: 0,
 };
+
+function recalcImageScore(player: Player): number {
+  let score = 0;
+  score += Math.min(30, player.inventory.wardrobeItems.reduce((s, w) => s + w.imageBonus, 0));
+  score += player.imageProfile.photoshootDone ? 20 : 0;
+  score += Math.min(20, player.socialAccounts.length * 10);
+  score += player.imageProfile.aesthetic ? 10 : 0;
+  score += Math.min(20, player.stats.image);
+  return Math.min(100, score);
+}
+
+function getCertification(streams: number): CertificationLevel {
+  if (streams >= CERT_THRESHOLDS.diamond) return 'diamond';
+  if (streams >= CERT_THRESHOLDS.multi_platinum) return 'multi_platinum';
+  if (streams >= CERT_THRESHOLDS.platinum) return 'platinum';
+  if (streams >= CERT_THRESHOLDS.gold) return 'gold';
+  return 'none';
+}
 
 const playerSlice = createSlice({
   name: 'player',
   initialState,
   reducers: {
-    createPlayer: (state, action: PayloadAction<{ name: string; artistName: string }>) => {
+    createPlayer: (state, action: PayloadAction<{
+      name: string;
+      artistName: string;
+      careerPath: import('../types').CareerPath;
+    }>) => {
+      const { name, artistName, careerPath } = action.payload;
+      const startingMoney = careerPath === 'label' ? 500 : 50;
       state.data = {
         id: Date.now().toString(),
-        name: action.payload.name,
-        artistName: action.payload.artistName,
+        name,
+        artistName,
+        careerPath,
+        artistPhase: 'origins',
         level: 1,
         xp: 0,
         xpToNextLevel: 500,
         stats: {
-          talent: 10,
-          charisma: 10,
-          business: 5,
-          production: 5,
-          globalReach: 0,
+          talent: 10, charisma: 10, business: 5,
+          production: 5, globalReach: 0, hustle: 5, image: 0,
         },
         currentRegionId: 'lagos',
-        inventory: { equipment: [], contracts: [], beats: [] },
+        inventory: { equipment: [], contracts: [], beats: [], wardrobeItems: [], merch: [] },
         reputation: { lagos: 0 },
         relationships: [],
         discography: [],
         achievements: [],
-        money: 500,
+        certifications: [],
+        money: startingMoney,
+        totalStreams: 0,
+        socialAccounts: [],
+        imageProfile: DEFAULT_IMAGE_PROFILE,
+        activeJob: null,
+        energy: 100,
         createdAt: Date.now(),
       };
     },
@@ -53,8 +96,11 @@ const playerSlice = createSlice({
       if (!state.data) return;
       Object.entries(action.payload).forEach(([key, value]) => {
         const stat = key as keyof PlayerStats;
-        state.data!.stats[stat] = Math.min(100, Math.max(0, state.data!.stats[stat] + value));
+        state.data!.stats[stat] = Math.min(100, Math.max(0, state.data!.stats[stat] + (value ?? 0)));
       });
+      if (state.data) {
+        state.data.imageProfile.imageScore = recalcImageScore(state.data);
+      }
     },
 
     gainMoney: (state, action: PayloadAction<number>) => {
@@ -77,72 +123,11 @@ const playerSlice = createSlice({
       }
     },
 
-    releaseTrack: (state, action: PayloadAction<Track>) => {
+    // ── Image phase actions ──────────────────────────────────────────────────
+
+    purchaseWardrobeItem: (state, action: PayloadAction<WardrobeItem>) => {
       if (!state.data) return;
-      state.data.discography.push(action.payload);
-    },
-
-    addEquipment: (state, action: PayloadAction<Equipment>) => {
-      if (!state.data) return;
-      state.data.inventory.equipment.push(action.payload);
-    },
-
-    signContract: (state, action: PayloadAction<Contract>) => {
-      if (!state.data) return;
-      state.data.inventory.contracts.push({ ...action.payload, signed: true });
-      state.data.money += action.payload.advanceMoney;
-    },
-
-    updateNpcAffinity: (
-      state,
-      action: PayloadAction<{ npcId: string; change: number }>
-    ) => {
-      if (!state.data) return;
-      const rel = state.data.relationships.find((r) => r.npcId === action.payload.npcId);
-      if (rel) {
-        rel.affinity = Math.min(100, Math.max(-100, rel.affinity + action.payload.change));
-        rel.status = getRelationshipStatus(rel.affinity);
-      } else {
-        const newAffinity = Math.min(100, Math.max(-100, action.payload.change));
-        state.data.relationships.push({
-          npcId: action.payload.npcId,
-          affinity: newAffinity,
-          status: getRelationshipStatus(newAffinity),
-          history: [],
-        });
-      }
-    },
-
-    unlockAchievement: (state, action: PayloadAction<string>) => {
-      if (!state.data) return;
-      if (!state.data.achievements.includes(action.payload)) {
-        state.data.achievements.push(action.payload);
-      }
-    },
-  },
-});
-
-function getRelationshipStatus(affinity: number) {
-  if (affinity <= -50) return 'rival';
-  if (affinity < 10) return 'stranger';
-  if (affinity < 30) return 'acquaintance';
-  if (affinity < 60) return 'ally';
-  if (affinity < 80) return 'collaborator';
-  return 'friend';
-}
-
-export const {
-  createPlayer,
-  gainXP,
-  updateStats,
-  gainMoney,
-  updateReputation,
-  travelToRegion,
-  releaseTrack,
-  addEquipment,
-  signContract,
-  updateNpcAffinity,
-  unlockAchievement,
-} = playerSlice.actions;
-
-export default playerSlice.reducer;
+      state.data.inventory.wardrobeItems.push(action.payload);
+      state.data.imageProfile.wardrobeScore = Math.min(
+        100,
+        state.data.imageProfile.wardrobe
