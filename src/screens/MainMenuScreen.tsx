@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useDispatch } from 'react-redux';
 import { startNewGame } from '../store/gameSlice';
@@ -24,8 +24,9 @@ export default function MainMenuScreen() {
           <Text style={styles.buttonText}>NEW GAME</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.button, styles.buttonSecondary]} activeOpacity={0.8}>
-          <Text style={[styles.buttonText, styles.buttonTextSecondary]}>CONTINUE</Text>
+        {/* TODO: Implement game persistence with redux-persist + AsyncStorage */}
+        <TouchableOpacity style={[styles.button, styles.buttonSecondary, styles.buttonDisabled]} disabled activeOpacity={1}>
+          <Text style={[styles.buttonText, styles.buttonTextDisabled]}>CONTINUE (COMING SOON)</Text>
         </TouchableOpacity>
 
         <View style={styles.regionPreviews}>
@@ -92,16 +93,9 @@ const styles = StyleSheet.create({
   buttonTextSecondary: {
     color: '#1DB954',
   },
-  regionPreviews: {
-    flexDirection: 'row',
-    marginTop: 48,
-    gap: 12,
+  buttonDisabled: {
+    borderColor: '#333',
+    opacity: 0.4,
   },
-  flag: { fontSize: 28 },
-  version: {
-    position: 'absolute',
-    bottom: 32,
-    color: '#444',
-    fontSize: 12,
-  },
-});
+  buttonTextDisabled: {
+    color
