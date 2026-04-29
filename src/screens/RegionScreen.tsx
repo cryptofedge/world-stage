@@ -7,11 +7,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSelector, useDispatch } from 'react-redux';
 import { StackScreenProps } from '@react-navigation/stack';
 import { RootState } from '../store';
-import { updateNpcAffinity } from '../store/playerSlice';
+import { updateNpcAffinity, gainMoney, gainXP, updateReputation, updateStats } from '../store/playerSlice';
+import { advanceTime } from '../store/gameSlice';
 import { REGIONS } from '../data/regions';
 import { NPCS } from '../data/npcs';
-import { NPC, DialogueResponse } from '../types';
+import { NPC, DialogueResponse, Venue } from '../types';
 import { RootStackParamList } from '../navigation';
+import { simulatePerformance } from '../utils/gameEngine';
 
 type Props = StackScreenProps<RootStackParamList, 'Region'>;
 
@@ -24,6 +26,7 @@ export default function RegionScreen({ route, navigation }: Props) {
 
   const [activeNpc, setActiveNpc] = useState<NPC | null>(null);
   const [dialogueIndex, setDialogueIndex] = useState(0);
+  const [performing, setPerforming] = useState(false);
 
   if (!region || !player) return null;
 
@@ -34,6 +37,46 @@ export default function RegionScreen({ route, navigation }: Props) {
   function openDialogue(npc: NPC) {
     setActiveNpc(npc);
     setDialogueIndex(0);
+  }
+
+  function confirmPerform(venue: Venue) {
+    if (!player) return;
+    if (player.money < venue.performanceCost) {
+      Alert.alert('Not Enough Cash', `You need $${venue.performanceCost.toLocaleString()} to book this venue.`);
+      return;
+    }
+    Alert.alert(
+      `Perform at ${venue.name}?`,
+      `Entry cost: $${venue.performanceCost.toLocaleString()}\nCapacity: ${venue.capacity.toLocaleString()}\nPrestige: ${'⭐'.repeat(venue.prestige)}`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Perform',
+          onPress: async () => {
+            setPerforming(true);
+            await new Promise((r) => setTimeout(r, 1000));
+            const result = simulatePerformance(player.stats, venue.prestige, player.reputation[regionId] ?? 0);
+            dispatch(gainMoney(-venue.performanceCost));
+            dispatch(gainMoney(result.moneyEarned));
+            dispatch(gainXP(result.xpEarned));
+            dispatch(updateReputation({ regionId, amount: result.repGained }));
+            dispatch(updateStats({ charisma: result.success ? 1 : 0 }));
+            dispatch(advanceTime(1));
+            setPerforming(false);
+
+            const emoji = result.audienceReaction >= 80 ? '🔥' : result.audienceReaction >= 60 ? '👏' : result.audienceReaction >= 40 ? '😐' : '😬';
+            Alert.alert(
+              `${emoji} Performance ${result.success ? 'Successful!' : 'Rough Night'}`,
+              `Audience reaction: ${result.audienceReaction}/100\n` +
+              `Revenue: $${result.moneyEarned.toLocaleString()}\n` +
+              `Rep gained: +${result.repGained}\n` +
+              `XP: +${result.xpEarned}`,
+              [{ text: 'Done', style: 'default' }]
+            );
+          },
+        },
+      ]
+    );
   }
 
   function handleResponse(response: DialogueResponse) {
@@ -102,13 +145,12 @@ export default function RegionScreen({ route, navigation }: Props) {
               </View>
               <TouchableOpacity
                 style={[styles.performBtn, !canPerform && styles.performBtnDisabled, { backgroundColor: canPerform ? region.primaryColor : '#222' }]}
-                disabled={!canPerform}
-                onPress={() => Alert.alert('Perform', `Book ${venue.name} for $${venue.performanceCost.toLocaleString()}?`, [
-                  { text: 'Cancel', style: 'cancel' },
-                  { text: 'Perform', onPress: () => {} },
-                ])}
+                disabled={!canPerform || performing}
+                onPress={() => confirmPerform(venue)}
               >
-                <Text style={[styles.performBtnText, !canPerform && { color: '#444' }]}>PERFORM</Text>
+                <Text style={[styles.performBtnText, !canPerform && { color: '#444' }]}>
+                  {performing ? '...' : 'PERFORM'}
+                </Text>
               </TouchableOpacity>
             </View>
           );
@@ -235,46 +277,4 @@ const styles = StyleSheet.create({
   performBtnText: { fontSize: 11, fontWeight: '800', color: '#000' },
   eventCard: {
     backgroundColor: '#111', borderRadius: 10,
-    padding: 14, marginBottom: 8, borderLeftWidth: 3,
-  },
-  eventType: { fontSize: 9, color: '#555', letterSpacing: 2, marginBottom: 4 },
-  eventName: { fontSize: 15, fontWeight: '800', color: '#fff', marginBottom: 4 },
-  eventDesc: { fontSize: 12, color: '#777', marginBottom: 6 },
-  eventRep: { fontSize: 12, fontWeight: '700' },
-  npcCard: {
-    flexDirection: 'row', alignItems: 'flex-start',
-    backgroundColor: '#111', borderRadius: 10,
-    padding: 14, marginBottom: 8, gap: 12,
-  },
-  npcAvatar: {
-    width: 44, height: 44, borderRadius: 22,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  npcAvatarText: { fontSize: 18, fontWeight: '900', color: '#fff' },
-  npcInfo: { flex: 1 },
-  npcName: { fontSize: 14, fontWeight: '800', color: '#fff', marginBottom: 2 },
-  npcRole: { fontSize: 11, color: '#888', marginBottom: 4 },
-  npcDesc: { fontSize: 12, color: '#666', lineHeight: 16 },
-  npcAffinity: { alignItems: 'flex-end' },
-  npcAffinityNum: { fontSize: 16, fontWeight: '900' },
-  npcAffinityLabel: { fontSize: 9, color: '#555', letterSpacing: 1 },
-  dialogueOverlay: {
-    position: 'absolute', top: 0, left: -20, right: -20,
-    backgroundColor: '#000000cc', padding: 24,
-    justifyContent: 'flex-end', minHeight: 300,
-    borderRadius: 16,
-  },
-  dialogueBox: {
-    borderRadius: 16, padding: 20, borderWidth: 1, borderColor: '#222',
-  },
-  dialogueName: { fontSize: 18, fontWeight: '900', color: '#fff' },
-  dialogueRole: { fontSize: 11, color: '#666', marginBottom: 12 },
-  dialogueText: { fontSize: 15, color: '#ddd', lineHeight: 22, marginBottom: 16, fontStyle: 'italic' },
-  responseBtn: {
-    borderWidth: 1, borderRadius: 8,
-    padding: 12, marginBottom: 8, alignItems: 'center',
-  },
-  responseBtnText: { fontSize: 13, fontWeight: '600' },
-  closeDialogue: { position: 'absolute', top: 12, right: 16 },
-  closeDialogueText: { color: '#555', fontSize: 18 },
-});
+    padding: 14, marginBottom:
