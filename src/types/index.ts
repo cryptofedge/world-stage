@@ -1,35 +1,196 @@
+// ─── Career Path ──────────────────────────────────────────────────────────────
+
+export type CareerPath = 'artist' | 'label';
+
+// ─── Career Phases ────────────────────────────────────────────────────────────
+
+export type ArtistPhase =
+  | 'origins'        // Broke, day job, saving money, writing lyrics
+  | 'image'          // Build your look before any music
+  | 'pre_production' // Beat buying, songwriting, studio hunting
+  | 'recording'      // Book & record in the studio
+  | 'distribution'   // Upload, release strategy
+  | 'promotion'      // Social media, videos, press, playlists
+  | 'touring'        // Live shows → world tours
+  | 'certified';     // Gold → Platinum → Diamond grind
+
+export type LabelPhase =
+  | 'foundation'     // Register LLC, branding, bank account
+  | 'scouting'       // Find unsigned talent
+  | 'signing'        // Negotiate & lock in contracts
+  | 'development'    // Develop artists: image, coaching, beats
+  | 'recording'      // Fund studio sessions for artists
+  | 'marketing'      // Campaigns, playlists, press, music videos
+  | 'touring'        // Book & support tours for your roster
+  | 'scaling'        // Multiple artists, sync deals, publishing
+  | 'certified';     // Win: one artist hits Diamond
+
+// ─── Certification ────────────────────────────────────────────────────────────
+
+export type CertificationLevel = 'none' | 'gold' | 'platinum' | 'multi_platinum' | 'diamond';
+
+export interface Certification {
+  level: CertificationLevel;
+  trackId?: string;
+  artistId?: string;
+  achievedAt?: number;
+}
+
+// Thresholds: 150 streams = 1 unit (RIAA standard)
+// Gold = 500K units = 75M streams
+// Platinum = 1M units = 150M streams
+// Multi-Platinum = 2M units = 300M streams
+// Diamond = 10M units = 1.5B streams
+export const CERT_THRESHOLDS: Record<CertificationLevel, number> = {
+  none: 0,
+  gold: 75_000_000,
+  platinum: 150_000_000,
+  multi_platinum: 300_000_000,
+  diamond: 1_500_000_000,
+};
+
+// ─── Image System ─────────────────────────────────────────────────────────────
+
+export interface ImageProfile {
+  completed: boolean;
+  aesthetic: ArtistAesthetic | null;
+  wardrobeScore: number;     // 0-100
+  photoshootDone: boolean;
+  pressPhotoUrl: string | null;
+  socialSetup: boolean;
+  brandColors: string[];
+  stylistHired: boolean;
+  imageScore: number;        // 0-100 — overall image rating
+}
+
+export type ArtistAesthetic =
+  | 'Street'
+  | 'Luxury'
+  | 'Afrocentric'
+  | 'Minimalist'
+  | 'Avant-garde'
+  | 'Vintage'
+  | 'Futuristic'
+  | 'Raw & Authentic';
+
+export interface WardrobeItem {
+  id: string;
+  name: string;
+  cost: number;
+  imageBonus: number;
+  aesthetic: ArtistAesthetic;
+  description: string;
+}
+
+export interface Photographer {
+  id: string;
+  name: string;
+  cost: number;
+  quality: number;   // 1-5
+  specialty: string;
+  description: string;
+}
+
+// ─── Social Media ─────────────────────────────────────────────────────────────
+
+export type SocialPlatform = 'Instagram' | 'TikTok' | 'YouTube' | 'Twitter/X' | 'Facebook';
+
+export interface SocialAccount {
+  platform: SocialPlatform;
+  handle: string;
+  followers: number;
+  engagementRate: number;  // 0-1
+  postsCount: number;
+  verified: boolean;
+  monthlyGrowth: number;
+}
+
+export interface ContentPost {
+  id: string;
+  platform: SocialPlatform;
+  type: 'behind_the_scenes' | 'music_snippet' | 'lifestyle' | 'announcement' | 'challenge' | 'collab';
+  quality: number;
+  reachGained: number;
+  followersGained: number;
+  postedAt: number;
+}
+
+export interface ViralMoment {
+  id: string;
+  platform: SocialPlatform;
+  description: string;
+  followersGained: number;
+  streamsGained: number;
+  occurredAt: number;
+}
+
+// ─── Day Jobs / Hustle ────────────────────────────────────────────────────────
+
+export interface DayJob {
+  id: string;
+  title: string;
+  description: string;
+  hourlyPay: number;
+  hoursPerShift: number;
+  energyCost: number;        // 0-100 — drains time/energy
+  timeCostDays: number;      // in-game days per shift
+  availablePhases: ArtistPhase[];
+}
+
+export interface HustleGig {
+  id: string;
+  title: string;
+  description: string;
+  payout: number;
+  successChance: number;   // 0-1
+  statRequirement?: Partial<PlayerStats>;
+  rewardType: 'money' | 'money_and_xp' | 'money_and_rep' | 'network';
+}
+
 // ─── Player ──────────────────────────────────────────────────────────────────
 
 export interface Player {
   id: string;
   name: string;
   artistName: string;
+  careerPath: CareerPath;
+  artistPhase: ArtistPhase;
   level: number;
   xp: number;
   xpToNextLevel: number;
   stats: PlayerStats;
   currentRegionId: string;
   inventory: Inventory;
-  reputation: Record<string, number>; // regionId → 0-100
+  reputation: Record<string, number>;   // regionId → 0-100
   relationships: Relationship[];
   discography: Track[];
   achievements: string[];
+  certifications: Certification[];
   money: number;
+  totalStreams: number;
+  socialAccounts: SocialAccount[];
+  imageProfile: ImageProfile;
+  activeJob: DayJob | null;
+  energy: number;           // 0-100 — regenerates each day
   createdAt: number;
 }
 
 export interface PlayerStats {
-  talent: number;       // 0-100 — raw musical ability
-  charisma: number;     // 0-100 — stage presence, networking
-  business: number;     // 0-100 — deal-making, contracts
-  production: number;   // 0-100 — studio craft
-  globalReach: number;  // 0-100 — cross-cultural appeal
+  talent: number;       // 0-100
+  charisma: number;     // 0-100
+  business: number;     // 0-100
+  production: number;   // 0-100
+  globalReach: number;  // 0-100
+  hustle: number;       // 0-100 — new: grind ethic, work rate
+  image: number;        // 0-100 — new: visual brand strength
 }
 
 export interface Inventory {
   equipment: Equipment[];
   contracts: Contract[];
   beats: Beat[];
+  wardrobeItems: WardrobeItem[];
+  merch: MerchLine[];
 }
 
 // ─── World ────────────────────────────────────────────────────────────────────
@@ -42,8 +203,8 @@ export interface Region {
   description: string;
   dominantGenres: MusicGenre[];
   unlockRequirement: UnlockRequirement;
-  vibe: string;          // flavour text
-  primaryColor: string;  // hex, for UI theming
+  vibe: string;
+  primaryColor: string;
   accentColor: string;
   npcs: NPC[];
   venues: Venue[];
@@ -58,206 +219,4 @@ export type Continent =
   | 'South America'
   | 'Oceania';
 
-export type MusicGenre =
-  | 'Afrobeats'
-  | 'Amapiano'
-  | 'K-Pop'
-  | 'J-Pop'
-  | 'Country'
-  | 'Hip-Hop'
-  | 'R&B'
-  | 'Pop'
-  | 'Rock'
-  | 'Electronic'
-  | 'Dancehall'
-  | 'Reggaeton'
-  | 'Samba'
-  | 'Baile Funk'
-  | 'Grime'
-  | 'Drill'
-  | 'Cumbia'
-  | 'Highlife'
-  | 'Bossa Nova'
-  | 'Latin Pop'
-  | 'Bollywood'
-  | 'Arabic Pop'
-  | 'Afro-House';
-
-export interface UnlockRequirement {
-  minLevel?: number;
-  minGlobalReach?: number;
-  completedQuest?: string;
-  minMoney?: number;
-}
-
-// ─── NPCs ─────────────────────────────────────────────────────────────────────
-
-export interface NPC {
-  id: string;
-  name: string;
-  role: NPCRole;
-  regionId: string;
-  description: string;
-  affinity: number; // -100 to 100 — starts neutral (0)
-  dialogues: Dialogue[];
-  offersQuests: string[];
-}
-
-export type NPCRole =
-  | 'Label Executive'
-  | 'Producer'
-  | 'Collaborator'
-  | 'Manager'
-  | 'Journalist'
-  | 'Rival Artist'
-  | 'Venue Owner'
-  | 'Street Promoter'
-  | 'Fan'
-  | 'Mentor';
-
-export interface Dialogue {
-  id: string;
-  trigger: 'first_meet' | 'low_affinity' | 'high_affinity' | 'quest_offer' | 'quest_complete';
-  text: string;
-  responses?: DialogueResponse[];
-}
-
-export interface DialogueResponse {
-  text: string;
-  effect: DialogueEffect;
-}
-
-export interface DialogueEffect {
-  affinityChange?: number;
-  statChange?: Partial<PlayerStats>;
-  moneyChange?: number;
-  unlockQuest?: string;
-  startQuest?: string;
-}
-
-// ─── Music Production ─────────────────────────────────────────────────────────
-
-export interface Track {
-  id: string;
-  title: string;
-  genre: MusicGenre;
-  regionId: string;
-  qualityScore: number; // 0-100
-  streams: number;
-  releaseDate: number;
-  collaborators: string[]; // NPC ids
-  reputationGained: Record<string, number>; // regionId → rep earned
-}
-
-export interface Beat {
-  id: string;
-  name: string;
-  genre: MusicGenre;
-  bpm: number;
-  qualityScore: number;
-  producerId?: string; // NPC id if purchased
-}
-
-export interface Equipment {
-  id: string;
-  name: string;
-  type: 'Microphone' | 'DAW' | 'Interface' | 'Instrument' | 'Headphones';
-  qualityBonus: number; // added to track quality rolls
-  cost: number;
-}
-
-// ─── Business ─────────────────────────────────────────────────────────────────
-
-export interface Contract {
-  id: string;
-  type: 'Record Deal' | 'Distribution' | 'Endorsement' | 'Publishing' | 'Tour';
-  label: string;
-  regionId: string;
-  royaltyRate: number;    // 0-1
-  advanceMoney: number;
-  albumsOwed: number;
-  expiresAt: number;      // timestamp
-  signed: boolean;
-}
-
-// ─── Quests & Events ──────────────────────────────────────────────────────────
-
-export interface Quest {
-  id: string;
-  title: string;
-  description: string;
-  regionId: string;
-  giverNpcId: string;
-  objectives: QuestObjective[];
-  rewards: QuestReward;
-  status: 'locked' | 'available' | 'active' | 'completed' | 'failed';
-}
-
-export interface QuestObjective {
-  id: string;
-  description: string;
-  type: 'record_track' | 'perform' | 'meet_npc' | 'earn_money' | 'gain_rep' | 'travel';
-  target: number;
-  current: number;
-  completed: boolean;
-}
-
-export interface QuestReward {
-  xp: number;
-  money: number;
-  statBoosts?: Partial<PlayerStats>;
-  unlockRegion?: string;
-  unlockNpc?: string;
-  item?: Equipment | Beat;
-}
-
-export interface GameEvent {
-  id: string;
-  name: string;
-  regionId: string;
-  type: 'Festival' | 'Award Show' | 'Open Mic' | 'Battle' | 'Showcase';
-  description: string;
-  entryRequirement: UnlockRequirement;
-  reputationBoost: number;
-}
-
-export interface Venue {
-  id: string;
-  name: string;
-  regionId: string;
-  capacity: number;
-  prestige: number; // 1-5
-  performanceCost: number;
-  minReputation: number;
-}
-
-// ─── Relationships ────────────────────────────────────────────────────────────
-
-export interface Relationship {
-  npcId: string;
-  affinity: number;
-  status: 'stranger' | 'acquaintance' | 'ally' | 'collaborator' | 'rival' | 'friend';
-  history: string[]; // log of interactions
-}
-
-// ─── Game State ───────────────────────────────────────────────────────────────
-
-export type GamePhase = 'main_menu' | 'character_creation' | 'playing' | 'game_over';
-
-export interface GameState {
-  phase: GamePhase;
-  player: Player | null;
-  currentRegionId: string;
-  unlockedRegions: string[];
-  activeQuests: Quest[];
-  completedQuests: string[];
-  gameTime: number; // in-game days
-  settings: GameSettings;
-}
-
-export interface GameSettings {
-  musicVolume: number;
-  sfxVolume: number;
-  notifications: boolean;
-  language: string;
-}
+e
