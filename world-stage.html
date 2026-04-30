@@ -50,6 +50,12 @@
   }
   .screen.active { display: flex; }
 
+  /* ── MOBILE BASE ── */
+  @media(max-width:768px) {
+    body { overflow-y: auto; height: auto; min-height: 100vh; }
+    .screen { position: relative; min-height: 100vh; overflow: visible; }
+  }
+
   /* ── PARTICLES CANVAS ── */
   #particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
 
@@ -89,8 +95,8 @@
     z-index: 2;
   }
   .btn-start {
-    margin-top: 48px;
-    padding: 16px 56px;
+    margin-top: 40px;
+    padding: 18px 52px;
     background: linear-gradient(135deg, var(--gold), var(--gold2));
     color: #0a0a0f;
     font-family: 'Bebas Neue', cursive;
@@ -98,12 +104,15 @@
     letter-spacing: 0.15em;
     border: none;
     cursor: pointer;
-    clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+    border-radius: 6px;
     transition: all 0.2s;
     z-index: 2;
     animation: pulse 2s ease-in-out infinite;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
   .btn-start:hover { transform: scale(1.05); filter: brightness(1.2); }
+  .btn-start:active { transform: scale(0.97); }
 
   @keyframes logoGlow {
     from { filter: drop-shadow(0 0 20px rgba(255,165,0,0.3)); }
@@ -134,8 +143,10 @@
   #charCreate {
     background: var(--dark2);
     overflow-y: auto;
-    padding: 40px 20px;
+    padding: 32px 16px 48px;
     z-index: 10;
+    justify-content: flex-start;
+    align-items: center;
   }
   .cc-container {
     width: 100%;
@@ -144,18 +155,19 @@
   }
   .cc-title {
     font-family: 'Bebas Neue', cursive;
-    font-size: 48px;
+    font-size: clamp(32px, 8vw, 48px);
     color: var(--gold);
     letter-spacing: 0.1em;
     text-align: center;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
   .cc-sub {
     text-align: center;
     color: var(--muted);
-    font-size: 13px;
-    letter-spacing: 0.1em;
-    margin-bottom: 32px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    margin-bottom: 24px;
+    padding: 0 8px;
   }
   .cc-grid {
     display: grid;
@@ -163,18 +175,20 @@
     gap: 32px;
     align-items: start;
   }
-  @media(max-width:600px){ .cc-grid{ grid-template-columns:1fr; } }
+  @media(max-width:600px){
+    .cc-grid { grid-template-columns: 1fr; gap: 24px; }
+  }
 
   /* Photo upload */
   .photo-box {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
   }
   .photo-ring {
-    width: 180px;
-    height: 180px;
+    width: 140px;
+    height: 140px;
     border-radius: 50%;
     border: 3px solid var(--gold);
     position: relative;
@@ -186,9 +200,14 @@
     justify-content: center;
     transition: all 0.3s;
     box-shadow: 0 0 0 6px rgba(255,215,0,0.08);
+    flex-shrink: 0;
   }
   .photo-ring:hover {
     box-shadow: 0 0 0 6px rgba(255,215,0,0.2), 0 0 30px rgba(255,215,0,0.3);
+  }
+  @media(max-width:600px){
+    .photo-ring { width: 110px; height: 110px; }
+    .photo-placeholder .icon { font-size: 28px; }
   }
   .photo-ring img {
     width: 100%;
@@ -247,17 +266,23 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
   }
+  @media(max-width:600px){
+    .genre-grid { grid-template-columns: repeat(2, 1fr); }
+  }
   .genre-btn {
-    padding: 10px 8px;
+    padding: 12px 8px;
     background: var(--dark3);
     border: 1px solid var(--border);
     color: var(--muted);
-    font-size: 12px;
+    font-size: 13px;
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: 6px;
     transition: all 0.2s;
     text-align: center;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
+  .genre-btn:active { transform: scale(0.97); }
   .genre-btn:hover { border-color: var(--gold); color: var(--text); }
   .genre-btn.selected {
     background: rgba(255,215,0,0.12);
@@ -970,11 +995,87 @@
 
   /* ── RESPONSIVE ── */
   @media(max-width:768px) {
-    .sidebar { width: 60px; min-width: 60px; }
-    .player-name, .player-genre, .level-badge, .stats-panel, .nav-link span, .money-display { display: none; }
-    .nav-link { justify-content: center; padding: 16px; }
-    .player-card { padding: 12px; }
-    .xp-bar-container { left: 60px; }
+    /* Hub switches to vertical layout on mobile */
+    #hub { flex-direction: column; overflow-y: auto; }
+
+    /* Sidebar becomes top nav bar */
+    .sidebar {
+      width: 100%;
+      min-width: unset;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+      flex-direction: row;
+      padding: 0;
+      overflow-x: auto;
+      flex-shrink: 0;
+    }
+    .player-card {
+      flex-direction: row;
+      padding: 10px 16px;
+      gap: 10px;
+      border-bottom: none;
+      border-right: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .player-avatar { width: 40px; height: 40px; }
+    .player-name { font-size: 13px; }
+    .player-genre { display: none; }
+    .level-badge { font-size: 10px; padding: 2px 8px; }
+    .stats-panel { display: none; }
+    .nav-links {
+      flex-direction: row;
+      padding: 0;
+      flex: 1;
+      overflow-x: auto;
+    }
+    .nav-link {
+      flex-direction: column;
+      gap: 3px;
+      padding: 10px 14px;
+      font-size: 9px;
+      letter-spacing: 0;
+      border-left: none;
+      border-bottom: 3px solid transparent;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .nav-link.active {
+      border-left: none;
+      border-bottom-color: var(--gold);
+    }
+    .nav-icon { font-size: 18px; }
+    .money-display {
+      padding: 10px 16px;
+      border-top: none;
+      border-left: 1px solid var(--border);
+      flex-shrink: 0;
+      font-size: 12px;
+    }
+    .money-label { font-size: 8px; }
+
+    /* Main content on mobile */
+    .main-content { padding: 16px; overflow-y: visible; }
+    .xp-bar-container { left: 0; top: auto; bottom: 0; }
+    .panel-title { font-size: 28px; }
+    .cards-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .game-card { padding: 14px; }
+    .card-icon { font-size: 24px; margin-bottom: 8px; }
+    .card-title { font-size: 16px; }
+    .card-desc { font-size: 11px; }
+    .card-reward { font-size: 10px; }
+    .regions-list { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .brand-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .brand-card { padding: 12px; }
+    .pro-cards { grid-template-columns: 1fr; }
+    .venue-row { flex-wrap: wrap; }
+    .modal-box { padding: 24px 16px; margin: 0 4px; }
+    .modal-title { font-size: 22px; }
+  }
+
+  @media(max-width:400px) {
+    .cards-grid { grid-template-columns: 1fr; }
+    .regions-list { grid-template-columns: 1fr; }
+    .brand-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -1950,54 +2051,4 @@ function showModal(type, data) {
       sesac: 'SESAC is invite-only and privately owned. Smaller but known for more accurate, data-driven royalty calculations. Bob Dylan, Adele, and Neil Diamond are SESAC members.',
       sgacedom: 'SGACEDOM is your gateway to Dominican Republic royalties under Ley 65-00. They handle both performance AND mechanical rights — and have reciprocal agreements via CISAC/LATINAUTOR for international collections.',
       sayce: 'SAYCE registration gives you access to Ecuador\'s entire three-society royalty system. Every public performance in Ecuador requires SAYCE authorization — mandatory by law under Código Ingenios 2016.',
-      mlc: 'The MLC was created by the Music Modernization Act of 2018 to fix the billions in unclaimed streaming mechanical royalties. Every US streamer (Spotify, Apple, Amazon) pays into The MLC.'
-    };
-    html = `
-      <div class="modal-icon">📋</div>
-      <div class="modal-title">REGISTERED WITH ${data.name}!</div>
-      <div class="modal-law-box">📖 <strong>What this means:</strong><br>${messages[data.id] || 'You\'re now registered and eligible for royalty collection in this territory.'}</div>
-      <div class="modal-rewards">+$300 first royalty payment · +80 XP</div>
-      <button class="modal-btn" onclick="closeModal()">COLLECT MY ROYALTIES</button>`;
-  }
-  else if (type === 'venue') {
-    html = `
-      <div class="modal-icon">🎪</div>
-      <div class="modal-title">SHOW BOOKED: ${data.name.toUpperCase()}</div>
-      <div class="modal-rewards">+$${data.fee.toLocaleString()} performance fee · +${fmtNum(data.follow)} new followers · +60 XP</div>
-      <div class="modal-law-box">📖 <strong>Performance Rights:</strong><br>Every live performance triggers performance royalties — the venue must have a blanket license from ASCAP, BMI, or SESAC to legally play music. As the performing artist, you're covered by your PRO registration. If you perform in the Dominican Republic, the venue needs a SGACEDOM license. In Ecuador, SAYCE authorization is mandatory for ANY public event.</div>
-      <button class="modal-btn" onclick="closeModal()">TAKE THE STAGE</button>`;
-  }
-  else if (type === 'levelUp') {
-    html = `
-      <div class="modal-icon">⬆️</div>
-      <div class="modal-title">LEVEL UP! YOU'RE NOW LEVEL ${data.level}</div>
-      <div class="modal-body" style="text-align:center">New venues, regions, and deals are unlocking. Keep building your career.</div>
-      ${data.level >= 3 ? '<div class="modal-rewards">🌍 Dominican Republic & Ecuador now accessible!</div>' : ''}
-      ${data.level >= 4 ? '<div class="modal-rewards">🎸 Nashville now accessible!</div>' : ''}
-      ${data.level >= 5 ? '<div class="modal-rewards">🇪🇨 Guayaquil now accessible!</div>' : ''}
-      <button class="modal-btn" onclick="closeModal()">LET\'S GO</button>`;
-  }
-  document.getElementById('modalContent').innerHTML = html;
-  document.getElementById('modalOverlay').classList.add('open');
-}
-
-function closeModal(e) {
-  if (e && e.target !== document.getElementById('modalOverlay')) return;
-  document.getElementById('modalOverlay').classList.remove('open');
-}
-
-// ═══════════════════════════════════════════════
-// TOAST
-// ═══════════════════════════════════════════════
-function toast(msg, type='') {
-  const c = document.getElementById('toastContainer');
-  const t = document.createElement('div');
-  t.className = `toast ${type}`;
-  t.textContent = msg;
-  c.appendChild(t);
-  setTimeout(() => t.remove(), 3500);
-}
-
-</script>
-</body>
-</html>
+      mlc: 'The MLC was created by the Music Modernization Act of 2018 to fix the billions in unclaimed streaming mechanical royalties. Every US strea
