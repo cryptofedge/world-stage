@@ -1,0 +1,2003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World Stage — Music Industry RPG</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --gold: #FFD700;
+    --gold2: #FFA500;
+    --dark: #0a0a0f;
+    --dark2: #12121a;
+    --dark3: #1a1a26;
+    --card: #1e1e2e;
+    --border: #2a2a3e;
+    --text: #e8e8f0;
+    --muted: #6b6b8a;
+    --green: #00ff88;
+    --blue: #4488ff;
+    --purple: #8844ff;
+    --red: #ff4466;
+    --atlanta: #ff6b35;
+    --nashville: #c8a96e;
+    --dr: #009b3a;
+    --ecuador: #ffda00;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  /* ── SCREENS ── */
+  .screen {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .screen.active { display: flex; }
+
+  /* ── PARTICLES CANVAS ── */
+  #particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+
+  /* ── SPLASH ── */
+  #splash {
+    background: radial-gradient(ellipse at center, #1a0a2e 0%, #0a0a0f 70%);
+    z-index: 10;
+  }
+  .splash-logo {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(72px, 12vw, 160px);
+    letter-spacing: 0.05em;
+    background: linear-gradient(135deg, #FFD700, #FFA500, #ff6b35);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: logoGlow 2s ease-in-out infinite alternate;
+    position: relative;
+    z-index: 2;
+    text-shadow: none;
+    filter: drop-shadow(0 0 40px rgba(255,165,0,0.4));
+  }
+  .splash-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(12px, 2vw, 18px);
+    color: var(--gold);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    opacity: 0.8;
+    margin-top: 8px;
+    z-index: 2;
+  }
+  .splash-tagline {
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 24px;
+    letter-spacing: 0.1em;
+    z-index: 2;
+  }
+  .btn-start {
+    margin-top: 48px;
+    padding: 16px 56px;
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    color: #0a0a0f;
+    font-family: 'Bebas Neue', cursive;
+    font-size: 22px;
+    letter-spacing: 0.15em;
+    border: none;
+    cursor: pointer;
+    clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+    transition: all 0.2s;
+    z-index: 2;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  .btn-start:hover { transform: scale(1.05); filter: brightness(1.2); }
+
+  @keyframes logoGlow {
+    from { filter: drop-shadow(0 0 20px rgba(255,165,0,0.3)); }
+    to   { filter: drop-shadow(0 0 60px rgba(255,165,0,0.7)); }
+  }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 20px rgba(255,215,0,0.3); }
+    50%      { box-shadow: 0 0 40px rgba(255,215,0,0.7); }
+  }
+
+  /* ── MUSIC NOTES ANIMATION ── */
+  .note {
+    position: absolute;
+    font-size: 24px;
+    opacity: 0;
+    animation: floatNote 4s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
+  }
+  @keyframes floatNote {
+    0%   { opacity:0; transform: translateY(0) rotate(0deg); }
+    20%  { opacity:0.6; }
+    80%  { opacity:0.3; }
+    100% { opacity:0; transform: translateY(-120px) rotate(20deg); }
+  }
+
+  /* ── CHARACTER CREATION ── */
+  #charCreate {
+    background: var(--dark2);
+    overflow-y: auto;
+    padding: 40px 20px;
+    z-index: 10;
+  }
+  .cc-container {
+    width: 100%;
+    max-width: 800px;
+    z-index: 2;
+  }
+  .cc-title {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 48px;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .cc-sub {
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    margin-bottom: 32px;
+  }
+  .cc-grid {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+  @media(max-width:600px){ .cc-grid{ grid-template-columns:1fr; } }
+
+  /* Photo upload */
+  .photo-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  .photo-ring {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    border: 3px solid var(--gold);
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    background: var(--dark3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    box-shadow: 0 0 0 6px rgba(255,215,0,0.08);
+  }
+  .photo-ring:hover {
+    box-shadow: 0 0 0 6px rgba(255,215,0,0.2), 0 0 30px rgba(255,215,0,0.3);
+  }
+  .photo-ring img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+  .photo-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 12px;
+    text-align: center;
+  }
+  .photo-placeholder .icon { font-size: 40px; }
+  .photo-ring-rotate {
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px dashed rgba(255,215,0,0.3);
+    animation: spin 8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #photoInput { display: none; }
+
+  /* Form fields */
+  .cc-form { display: flex; flex-direction: column; gap: 20px; }
+  .field-group { display: flex; flex-direction: column; gap: 8px; }
+  .field-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  .field-input {
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 12px 16px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+    border-radius: 4px;
+  }
+  .field-input:focus { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(255,215,0,0.1); }
+  .field-input option { background: var(--dark3); }
+
+  /* Genre selector */
+  .genre-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .genre-btn {
+    padding: 10px 8px;
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .genre-btn:hover { border-color: var(--gold); color: var(--text); }
+  .genre-btn.selected {
+    background: rgba(255,215,0,0.12);
+    border-color: var(--gold);
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  .btn-create {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    color: #0a0a0f;
+    font-family: 'Bebas Neue', cursive;
+    font-size: 20px;
+    letter-spacing: 0.15em;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+    margin-top: 8px;
+  }
+  .btn-create:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,165,0,0.4); }
+
+  /* ── INTRO CINEMATIC ── */
+  #intro {
+    background: #000;
+    z-index: 10;
+  }
+  .intro-text {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(28px,5vw,56px);
+    color: var(--gold);
+    letter-spacing: 0.08em;
+    text-align: center;
+    max-width: 700px;
+    padding: 40px;
+    opacity: 0;
+    animation: fadeInOut 3s ease forwards;
+  }
+  @keyframes fadeInOut {
+    0%   { opacity:0; transform: scale(0.95); }
+    20%  { opacity:1; transform: scale(1); }
+    75%  { opacity:1; }
+    100% { opacity:0; }
+  }
+  .intro-skip {
+    position: absolute;
+    bottom: 32px;
+    right: 32px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 8px 20px;
+    cursor: pointer;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    border-radius: 4px;
+  }
+  .intro-skip:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ── HUB / MAIN GAME ── */
+  #hub {
+    background: var(--dark);
+    flex-direction: row;
+    align-items: stretch;
+    z-index: 5;
+    overflow: hidden;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 220px;
+    min-width: 220px;
+    background: var(--dark2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+    z-index: 2;
+  }
+  .player-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 16px 24px;
+    border-bottom: 1px solid var(--border);
+    gap: 10px;
+  }
+  .player-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    object-fit: cover;
+    box-shadow: 0 0 16px rgba(255,215,0,0.3);
+  }
+  .player-name {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 18px;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    text-align: center;
+  }
+  .player-genre {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .level-badge {
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    color: #0a0a0f;
+    font-family: 'Bebas Neue', cursive;
+    font-size: 13px;
+    padding: 3px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.1em;
+  }
+
+  /* Stats */
+  .stats-panel {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .stat-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .stat-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+  }
+  .stat-name { color: var(--muted); letter-spacing: 0.05em; }
+  .stat-val { color: var(--text); font-weight: 600; font-family: 'Space Mono', monospace; }
+  .stat-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .stat-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.6s ease;
+  }
+
+  /* Nav */
+  .nav-links {
+    display: flex;
+    flex-direction: column;
+    padding: 12px 0;
+    flex: 1;
+  }
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+    border-left: 3px solid transparent;
+  }
+  .nav-link:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+  .nav-link.active {
+    color: var(--gold);
+    border-left-color: var(--gold);
+    background: rgba(255,215,0,0.05);
+  }
+  .nav-icon { font-size: 16px; }
+
+  /* Money display */
+  .money-display {
+    padding: 16px;
+    border-top: 1px solid var(--border);
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    color: var(--green);
+    letter-spacing: 0.05em;
+  }
+  .money-label { font-size: 10px; color: var(--muted); margin-bottom: 4px; }
+
+  /* Main content area */
+  .main-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px;
+    position: relative;
+  }
+
+  /* ── PANELS ── */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .panel-title {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 36px;
+    color: var(--gold);
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+  .panel-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  /* Cards grid */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .game-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .game-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--gold2));
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .game-card:hover {
+    border-color: rgba(255,215,0,0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .game-card:hover::before { opacity: 1; }
+  .game-card.locked {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .game-card.locked:hover { transform: none; }
+  .card-icon { font-size: 32px; margin-bottom: 12px; }
+  .card-title {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 20px;
+    color: var(--text);
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+  .card-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .card-reward {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--green);
+    font-family: 'Space Mono', monospace;
+  }
+  .card-badge {
+    position: absolute;
+    top: 12px; right: 12px;
+    background: rgba(255,215,0,0.12);
+    color: var(--gold);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-family: 'Space Mono', monospace;
+    border: 1px solid rgba(255,215,0,0.2);
+  }
+  .locked-tag {
+    position: absolute;
+    top: 12px; right: 12px;
+    background: rgba(255,68,102,0.12);
+    color: var(--red);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-family: 'Space Mono', monospace;
+    border: 1px solid rgba(255,68,102,0.2);
+  }
+
+  /* ── WORLD MAP ── */
+  .map-container {
+    position: relative;
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px;
+    min-height: 400px;
+    overflow: hidden;
+  }
+  .map-title {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 14px;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    margin-bottom: 24px;
+  }
+  .regions-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+  .region-card {
+    background: var(--dark2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .region-card.available:hover {
+    border-color: var(--gold);
+    box-shadow: 0 4px 16px rgba(255,215,0,0.15);
+  }
+  .region-card.current {
+    border-color: var(--gold);
+    background: rgba(255,215,0,0.05);
+  }
+  .region-card.coming-soon { opacity: 0.35; cursor: not-allowed; }
+  .region-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+    animation: regionPulse 2s ease-in-out infinite;
+  }
+  .region-card.coming-soon .region-dot { animation: none; }
+  @keyframes regionPulse {
+    0%,100% { box-shadow: 0 0 0 0 currentColor; }
+    50% { box-shadow: 0 0 0 4px rgba(255,215,0,0); }
+  }
+  .region-name {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 18px;
+    letter-spacing: 0.05em;
+  }
+  .region-country { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .region-genre { font-size: 11px; color: var(--muted); margin-top: 4px; font-style: italic; }
+  .region-status {
+    position: absolute;
+    top: 12px; right: 12px;
+    font-size: 10px;
+    font-family: 'Space Mono', monospace;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+  .status-active {
+    background: rgba(0,255,136,0.1);
+    color: var(--green);
+    border: 1px solid rgba(0,255,136,0.2);
+  }
+  .status-locked {
+    background: rgba(255,68,102,0.1);
+    color: var(--red);
+    border: 1px solid rgba(255,68,102,0.2);
+  }
+  .status-soon {
+    background: rgba(107,107,138,0.2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  /* ── FASHION PANEL ── */
+  .drip-meter {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .drip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .drip-title {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 22px;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+  }
+  .drip-score-big {
+    font-family: 'Space Mono', monospace;
+    font-size: 36px;
+    color: var(--gold);
+    font-weight: 700;
+  }
+  .drip-bar-outer {
+    height: 12px;
+    background: var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .drip-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #FFD700, #FF6B35);
+    border-radius: 6px;
+    transition: width 0.8s ease;
+  }
+  .drip-tier {
+    font-size: 12px;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .brand-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+  }
+  .brand-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .brand-card:hover:not(.owned):not(.locked-brand) {
+    border-color: rgba(255,215,0,0.4);
+    transform: translateY(-2px);
+  }
+  .brand-card.owned {
+    border-color: rgba(0,255,136,0.3);
+    background: rgba(0,255,136,0.03);
+  }
+  .brand-card.locked-brand { opacity: 0.35; cursor: not-allowed; }
+  .brand-tier-tag {
+    font-size: 9px;
+    font-family: 'Space Mono', monospace;
+    padding: 2px 6px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .tier-underground { background: rgba(107,107,138,0.2); color: var(--muted); }
+  .tier-streetwear  { background: rgba(255,107,53,0.15); color: var(--atlanta); }
+  .tier-luxury_street { background: rgba(68,136,255,0.15); color: var(--blue); }
+  .tier-high_fashion  { background: rgba(136,68,255,0.15); color: var(--purple); }
+  .tier-icon          { background: rgba(255,215,0,0.15); color: var(--gold); }
+  .brand-name {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 18px;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+  .brand-founder { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+  .brand-drip {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--gold);
+  }
+  .brand-price {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .owned-check {
+    position: absolute;
+    top: 12px; right: 12px;
+    color: var(--green);
+    font-size: 16px;
+  }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    backdrop-filter: blur(4px);
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--dark2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    max-width: 520px;
+    width: 100%;
+    position: relative;
+    animation: modalIn 0.25s ease;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+  @keyframes modalIn {
+    from { opacity:0; transform: scale(0.92) translateY(16px); }
+    to   { opacity:1; transform: scale(1) translateY(0); }
+  }
+  .modal-close {
+    position: absolute;
+    top: 16px; right: 16px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 20px;
+    cursor: pointer;
+  }
+  .modal-close:hover { color: var(--text); }
+  .modal-icon { font-size: 48px; margin-bottom: 12px; }
+  .modal-title {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 28px;
+    color: var(--gold);
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+  .modal-body { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 16px; }
+  .modal-law-box {
+    background: var(--dark3);
+    border-left: 3px solid var(--gold);
+    padding: 12px 16px;
+    border-radius: 0 4px 4px 0;
+    margin: 12px 0;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .modal-rewards {
+    background: rgba(0,255,136,0.05);
+    border: 1px solid rgba(0,255,136,0.15);
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--green);
+    margin: 12px 0;
+  }
+  .modal-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    color: #0a0a0f;
+    font-family: 'Bebas Neue', cursive;
+    font-size: 18px;
+    letter-spacing: 0.1em;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.2s;
+  }
+  .modal-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+  .modal-btn-secondary {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 13px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.2s;
+  }
+  .modal-btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ── TOAST ── */
+  .toast-container {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 200;
+  }
+  .toast {
+    background: var(--dark2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-size: 13px;
+    max-width: 320px;
+    animation: toastIn 0.3s ease;
+    border-left: 3px solid var(--gold);
+  }
+  .toast.success { border-left-color: var(--green); }
+  .toast.error   { border-left-color: var(--red); }
+  @keyframes toastIn {
+    from { opacity:0; transform: translateX(20px); }
+    to   { opacity:1; transform: translateX(0); }
+  }
+
+  /* ── XP BAR ── */
+  .xp-bar-container {
+    position: fixed;
+    top: 0; left: 220px; right: 0;
+    height: 3px;
+    background: var(--border);
+    z-index: 50;
+  }
+  .xp-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--gold2));
+    transition: width 0.6s ease;
+  }
+
+  /* ── PRO PANEL ── */
+  .pro-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .pro-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    transition: all 0.2s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .pro-card:hover { border-color: rgba(255,215,0,0.3); transform: translateY(-2px); }
+  .pro-card.registered { border-color: rgba(0,255,136,0.3); }
+  .pro-card::after {
+    content: attr(data-pro);
+    position: absolute;
+    bottom: -20px; right: -10px;
+    font-family: 'Bebas Neue', cursive;
+    font-size: 80px;
+    color: rgba(255,255,255,0.02);
+    letter-spacing: 0;
+    pointer-events: none;
+  }
+  .pro-name {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 28px;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+  }
+  .pro-type { font-size: 11px; color: var(--muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.1em; }
+  .pro-stat { font-size: 12px; color: var(--text); margin: 4px 0; }
+  .pro-stat span { color: var(--gold); font-family: 'Space Mono', monospace; }
+  .registered-badge {
+    position: absolute;
+    top: 12px; right: 12px;
+    background: rgba(0,255,136,0.1);
+    color: var(--green);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-family: 'Space Mono', monospace;
+    border: 1px solid rgba(0,255,136,0.2);
+  }
+
+  /* ── VENUE PANEL ── */
+  .venue-list { display: flex; flex-direction: column; gap: 12px; }
+  .venue-row {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .venue-row:hover { border-color: rgba(255,215,0,0.3); }
+  .venue-row.locked-venue { opacity: 0.4; cursor: not-allowed; }
+  .venue-cap {
+    min-width: 80px;
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    color: var(--gold);
+  }
+  .venue-cap-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+  .venue-info { flex: 1; }
+  .venue-name { font-family: 'Bebas Neue', cursive; font-size: 18px; letter-spacing: 0.05em; }
+  .venue-city { font-size: 11px; color: var(--muted); }
+  .venue-fee {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    color: var(--green);
+  }
+  .venue-req { font-size: 10px; color: var(--red); margin-top: 2px; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:768px) {
+    .sidebar { width: 60px; min-width: 60px; }
+    .player-name, .player-genre, .level-badge, .stats-panel, .nav-link span, .money-display { display: none; }
+    .nav-link { justify-content: center; padding: 16px; }
+    .player-card { padding: 12px; }
+    .xp-bar-container { left: 60px; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ═══════════════════════════════════════════════
+     SCREEN 1: SPLASH
+═══════════════════════════════════════════════ -->
+<div class="screen active" id="splash">
+  <div class="note" style="left:10%;top:70%;animation-delay:0s">♪</div>
+  <div class="note" style="left:20%;top:80%;animation-delay:1s">♫</div>
+  <div class="note" style="left:75%;top:75%;animation-delay:0.5s">♩</div>
+  <div class="note" style="left:85%;top:85%;animation-delay:1.5s">♬</div>
+  <div class="note" style="left:45%;top:85%;animation-delay:2s">♪</div>
+  <div class="note" style="left:60%;top:78%;animation-delay:0.8s">♫</div>
+  <div class="splash-logo">WORLD STAGE</div>
+  <div class="splash-sub">Music Industry RPG</div>
+  <div class="splash-tagline">Learn the industry. Own your career.</div>
+  <button class="btn-start" onclick="showScreen('charCreate')">BEGIN YOUR JOURNEY</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SCREEN 2: CHARACTER CREATION
+═══════════════════════════════════════════════ -->
+<div class="screen" id="charCreate" style="background:var(--dark2); overflow-y:auto; padding:40px 20px; z-index:10;">
+  <div class="cc-container">
+    <div class="cc-title">CREATE YOUR ARTIST</div>
+    <div class="cc-sub">YOUR JOURNEY STARTS HERE — ADD YOUR PHOTO TO BECOME THE CHARACTER</div>
+    <div class="cc-grid">
+      <!-- Photo upload -->
+      <div class="photo-box">
+        <div class="photo-ring" onclick="document.getElementById('photoInput').click()">
+          <div class="photo-ring-rotate"></div>
+          <div class="photo-placeholder" id="photoPlaceholder">
+            <div class="icon">📸</div>
+            <div>TAP TO ADD<br>YOUR PHOTO</div>
+          </div>
+          <img id="photoPreview" style="display:none;" alt="Your photo">
+        </div>
+        <input type="file" id="photoInput" accept="image/*" onchange="handlePhoto(event)">
+        <div style="font-size:11px;color:var(--muted);text-align:center;max-width:160px;">
+          Your photo becomes your in-game character
+        </div>
+      </div>
+
+      <!-- Form -->
+      <div class="cc-form">
+        <div class="field-group">
+          <div class="field-label">Artist Name</div>
+          <input class="field-input" id="artistName" type="text" placeholder="Your stage name..." maxlength="24">
+        </div>
+        <div class="field-group">
+          <div class="field-label">City of Origin</div>
+          <input class="field-input" id="artistCity" type="text" placeholder="e.g. Atlanta, NY, Santo Domingo...">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Primary Genre</div>
+          <div class="genre-grid" id="genreGrid">
+            <div class="genre-btn" onclick="selectGenre(this,'Hip-Hop/Rap')">🎤 Hip-Hop</div>
+            <div class="genre-btn" onclick="selectGenre(this,'R&B/Soul')">🎵 R&B/Soul</div>
+            <div class="genre-btn" onclick="selectGenre(this,'Trap')">🔊 Trap</div>
+            <div class="genre-btn" onclick="selectGenre(this,'Afrobeats')">🥁 Afrobeats</div>
+            <div class="genre-btn" onclick="selectGenre(this,'Latin Urban')">💃 Latin Urban</div>
+            <div class="genre-btn" onclick="selectGenre(this,'Pop')">⭐ Pop</div>
+            <div class="genre-btn" onclick="selectGenre(this,'Reggaeton')">🎶 Reggaeton</div>
+            <div class="genre-btn" onclick="selectGenre(this,'Country')">🤠 Country</div>
+            <div class="genre-btn" onclick="selectGenre(this,'Electronic')">🎛️ Electronic</div>
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Starting Region</div>
+          <select class="field-input" id="startRegion">
+            <option value="atlanta">🇺🇸 Atlanta, GA — USA (Recommended)</option>
+            <option value="nashville">🇺🇸 Nashville, TN — USA (Level 4+)</option>
+            <option value="santo_domingo">🇩🇴 Santo Domingo — Dominican Republic (Level 3+)</option>
+            <option value="quito">🇪🇨 Quito — Ecuador (Level 3+)</option>
+          </select>
+        </div>
+        <button class="btn-create" onclick="createCharacter()">🎤 START MY CAREER</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SCREEN 3: CINEMATIC INTRO
+═══════════════════════════════════════════════ -->
+<div class="screen" id="intro" style="background:#000;z-index:10;">
+  <div class="intro-text" id="introText"></div>
+  <button class="intro-skip" onclick="startGame()">SKIP ›</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SCREEN 4: MAIN HUB
+═══════════════════════════════════════════════ -->
+<div class="screen" id="hub">
+  <!-- XP bar -->
+  <div class="xp-bar-container"><div class="xp-bar-fill" id="xpBar" style="width:0%"></div></div>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="player-card">
+      <img class="player-avatar" id="sidebarAvatar" src="" alt="Artist">
+      <div class="player-name" id="sidebarName">ARTIST</div>
+      <div class="player-genre" id="sidebarGenre">Hip-Hop</div>
+      <div class="level-badge" id="sidebarLevel">LEVEL 1</div>
+    </div>
+    <div class="stats-panel">
+      <div class="stat-row">
+        <div class="stat-header"><span class="stat-name">💰 Money</span><span class="stat-val" id="statMoney">$500</span></div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-header"><span class="stat-name">🎵 Streams</span><span class="stat-val" id="statStreams">0</span></div>
+        <div class="stat-bar"><div class="stat-fill" id="barStreams" style="width:0%;background:var(--blue)"></div></div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-header"><span class="stat-name">👥 Following</span><span class="stat-val" id="statFollow">0</span></div>
+        <div class="stat-bar"><div class="stat-fill" id="barFollow" style="width:0%;background:var(--purple)"></div></div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-header"><span class="stat-name">🔥 Drip Score</span><span class="stat-val" id="statDrip">0</span></div>
+        <div class="stat-bar"><div class="stat-fill" id="barDrip" style="width:0%;background:linear-gradient(90deg,#FFD700,#FF6B35)"></div></div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-header"><span class="stat-name">🛡️ Street Cred</span><span class="stat-val" id="statCred">0</span></div>
+        <div class="stat-bar"><div class="stat-fill" id="barCred" style="width:0%;background:var(--green)"></div></div>
+      </div>
+    </div>
+    <div class="nav-links">
+      <div class="nav-link active" onclick="showPanel('career')"><span class="nav-icon">🎤</span><span>Career</span></div>
+      <div class="nav-link" onclick="showPanel('map')"><span class="nav-icon">🗺️</span><span>World Map</span></div>
+      <div class="nav-link" onclick="showPanel('fashion')"><span class="nav-icon">👑</span><span>Fashion</span></div>
+      <div class="nav-link" onclick="showPanel('pro')"><span class="nav-icon">📋</span><span>Register PRO</span></div>
+      <div class="nav-link" onclick="showPanel('venues')"><span class="nav-icon">🎪</span><span>Venues</span></div>
+      <div class="nav-link" onclick="showPanel('education')"><span class="nav-icon">📚</span><span>Learn</span></div>
+    </div>
+    <div class="money-display">
+      <div class="money-label">BANK</div>
+      <div id="sidebarMoney">$500</div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="main-content">
+
+    <!-- ── CAREER PANEL ── -->
+    <div class="panel active" id="panel-career">
+      <div class="panel-title" id="careerRegionTitle">ATLANTA, GA</div>
+      <div class="panel-sub" id="careerRegionSub">Your journey begins here. Build your career, register your music, and level up.</div>
+      <div class="cards-grid">
+        <div class="game-card" onclick="doAction('record')">
+          <div class="card-icon">🎙️</div>
+          <div class="card-badge">FREE</div>
+          <div class="card-title">Record a Track</div>
+          <div class="card-desc">Hit the studio and lay down your next single. Every stream counts toward your breakthrough.</div>
+          <div class="card-reward">+500 Streams · +$200 · +50 XP</div>
+        </div>
+        <div class="game-card" onclick="doAction('social')">
+          <div class="card-icon">📱</div>
+          <div class="card-badge">FREE</div>
+          <div class="card-title">Post on Social</div>
+          <div class="card-desc">Drop content on Instagram, TikTok & YouTube. Grow your following organically.</div>
+          <div class="card-reward">+200 Followers · +5 Drip · +30 XP</div>
+        </div>
+        <div class="game-card" onclick="doAction('collab')">
+          <div class="card-icon">🤝</div>
+          <div class="card-badge">-$100</div>
+          <div class="card-title">Feature Collab</div>
+          <div class="card-desc">Work with another artist on a track. Split royalties but double the exposure.</div>
+          <div class="card-reward">+1,200 Streams · +300 Followers · +80 XP</div>
+        </div>
+        <div class="game-card" onclick="doAction('sync')">
+          <div class="card-icon">🎬</div>
+          <div class="card-badge">-$50</div>
+          <div class="card-title">Pitch Sync License</div>
+          <div class="card-desc">Submit your track for TV, film, or ad placement. Micro-sync can earn serious money.</div>
+          <div class="card-reward">+$800 · +300 Followers · +60 XP</div>
+        </div>
+        <div class="game-card" onclick="doAction('distributor')">
+          <div class="card-icon">📦</div>
+          <div class="card-badge">-$23</div>
+          <div class="card-title">Digital Distributor</div>
+          <div class="card-desc">Put your music on Spotify, Apple Music & all DSPs via DistroKid. Own your masters.</div>
+          <div class="card-reward">+2K Streams · +$150 royalties · +100 XP</div>
+        </div>
+        <div class="game-card" onclick="doAction('manager')">
+          <div class="card-icon">💼</div>
+          <div class="card-badge">-$200</div>
+          <div class="card-title">Hire a Manager</div>
+          <div class="card-desc">A good manager opens doors — but they take 15–20%. Know your deal before you sign.</div>
+          <div class="card-reward">+500 Followers · +$600 · +70 XP</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MAP PANEL ── -->
+    <div class="panel" id="panel-map">
+      <div class="panel-title">WORLD MAP</div>
+      <div class="panel-sub">3 regions available now. 6 coming soon. Build your global reach.</div>
+      <div class="map-container">
+        <div class="map-title">SELECT A REGION TO TRAVEL</div>
+        <div class="regions-list">
+          <div class="region-card available current" onclick="travelTo('atlanta')">
+            <div><span class="region-dot" style="color:var(--atlanta);background:var(--atlanta)"></span><span class="region-name" style="color:var(--atlanta)">Atlanta</span></div>
+            <div class="region-country">🇺🇸 Georgia, USA</div>
+            <div class="region-genre">Hip-Hop · Trap · R&B</div>
+            <div class="region-status status-active">CURRENT</div>
+          </div>
+          <div class="region-card available" onclick="travelTo('nashville')">
+            <div><span class="region-dot" style="color:var(--nashville);background:var(--nashville)"></span><span class="region-name" style="color:var(--nashville)">Nashville</span></div>
+            <div class="region-country">🇺🇸 Tennessee, USA</div>
+            <div class="region-genre">Country · Americana · Pop</div>
+            <div class="region-status status-active">LVL 4+</div>
+          </div>
+          <div class="region-card available" onclick="travelTo('santo_domingo')">
+            <div><span class="region-dot" style="color:var(--dr);background:var(--dr)"></span><span class="region-name" style="color:var(--dr)">Santo Domingo</span></div>
+            <div class="region-country">🇩🇴 Dominican Republic</div>
+            <div class="region-genre">Merengue · Bachata · Reggaeton</div>
+            <div class="region-status status-active">LVL 3+</div>
+          </div>
+          <div class="region-card available" onclick="travelTo('quito')">
+            <div><span class="region-dot" style="color:var(--ecuador);background:var(--ecuador)"></span><span class="region-name" style="color:var(--ecuador)">Quito</span></div>
+            <div class="region-country">🇪🇨 Ecuador</div>
+            <div class="region-genre">Pasillo · Sanjuanito · Urban Latino</div>
+            <div class="region-status status-active">LVL 3+</div>
+          </div>
+          <div class="region-card available" onclick="travelTo('guayaquil')">
+            <div><span class="region-dot" style="color:var(--ecuador);background:var(--ecuador)"></span><span class="region-name" style="color:var(--ecuador)">Guayaquil</span></div>
+            <div class="region-country">🇪🇨 Ecuador</div>
+            <div class="region-genre">Cumbia · Marimba · Afro-Ecuadorian</div>
+            <div class="region-status status-active">LVL 5+</div>
+          </div>
+          <div class="region-card coming-soon">
+            <div><span class="region-dot" style="color:var(--muted);background:var(--muted)"></span><span class="region-name" style="color:var(--muted)">Lagos</span></div>
+            <div class="region-country">🇳🇬 Nigeria</div>
+            <div class="region-genre">Afrobeats · Amapiano</div>
+            <div class="region-status status-soon">COMING SOON</div>
+          </div>
+          <div class="region-card coming-soon">
+            <div><span class="region-dot" style="color:var(--muted);background:var(--muted)"></span><span class="region-name" style="color:var(--muted)">Seoul</span></div>
+            <div class="region-country">🇰🇷 South Korea</div>
+            <div class="region-genre">K-Pop · Indie</div>
+            <div class="region-status status-soon">COMING SOON</div>
+          </div>
+          <div class="region-card coming-soon">
+            <div><span class="region-dot" style="color:var(--muted);background:var(--muted)"></span><span class="region-name" style="color:var(--muted)">London</span></div>
+            <div class="region-country">🇬🇧 United Kingdom</div>
+            <div class="region-genre">UK Drill · Grime · Pop</div>
+            <div class="region-status status-soon">COMING SOON</div>
+          </div>
+          <div class="region-card coming-soon">
+            <div><span class="region-dot" style="color:var(--muted);background:var(--muted)"></span><span class="region-name" style="color:var(--muted)">São Paulo</span></div>
+            <div class="region-country">🇧🇷 Brazil</div>
+            <div class="region-genre">Funk · Samba · Trap</div>
+            <div class="region-status status-soon">COMING SOON</div>
+          </div>
+          <div class="region-card coming-soon">
+            <div><span class="region-dot" style="color:var(--muted);background:var(--muted)"></span><span class="region-name" style="color:var(--muted)">Tokyo</span></div>
+            <div class="region-country">🇯🇵 Japan</div>
+            <div class="region-genre">J-Pop · City Pop · Hyperpop</div>
+            <div class="region-status status-soon">COMING SOON</div>
+          </div>
+          <div class="region-card coming-soon">
+            <div><span class="region-dot" style="color:var(--muted);background:var(--muted)"></span><span class="region-name" style="color:var(--muted)">Johannesburg</span></div>
+            <div class="region-country">🇿🇦 South Africa</div>
+            <div class="region-genre">Amapiano · Kwaito · Hip-Hop</div>
+            <div class="region-status status-soon">COMING SOON</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FASHION PANEL ── -->
+    <div class="panel" id="panel-fashion">
+      <div class="panel-title">NYC FASHION & SWAG</div>
+      <div class="panel-sub">Your look is your brand. Build your Drip Score to unlock better deals, higher booking fees, and label attention.</div>
+      <div class="drip-meter">
+        <div class="drip-header">
+          <div>
+            <div class="drip-title">DRIP SCORE</div>
+            <div class="drip-tier" id="dripTierLabel">No Drip</div>
+          </div>
+          <div class="drip-score-big" id="dripScoreBig">0</div>
+        </div>
+        <div class="drip-bar-outer"><div class="drip-bar-fill" id="dripBarFill" style="width:0%"></div></div>
+        <div style="font-size:12px;color:var(--muted);margin-top:8px;">Higher drip = more booking fee · more label interest · more media value</div>
+      </div>
+      <div class="brand-grid" id="brandGrid"></div>
+    </div>
+
+    <!-- ── PRO PANEL ── -->
+    <div class="panel" id="panel-pro">
+      <div class="panel-title">REGISTER WITH A PRO</div>
+      <div class="panel-sub">A Performance Rights Organization (PRO) collects royalties when your music is played publicly. You MUST register to get paid.</div>
+      <div class="pro-cards">
+        <div class="pro-card" data-pro="ASCAP" onclick="registerPRO('ascap')">
+          <div id="ascap-badge" style="display:none" class="registered-badge">✓ REGISTERED</div>
+          <div class="pro-name">ASCAP</div>
+          <div class="pro-type">Non-Profit · Founded 1914</div>
+          <div class="pro-stat">Members: <span>1.1 Million+</span></div>
+          <div class="pro-stat">Catalog: <span>20M+ works</span></div>
+          <div class="pro-stat">Registration: <span>FREE</span></div>
+          <div class="pro-stat">Royalty type: <span>Performance</span></div>
+          <div class="pro-stat">Structure: <span>Non-profit board</span></div>
+          <div style="margin-top:12px;font-size:11px;color:var(--muted);line-height:1.6;">Issues blanket licenses to venues, radio, TV, streaming. Pays writers and publishers quarterly.</div>
+        </div>
+        <div class="pro-card" data-pro="BMI" onclick="registerPRO('bmi')">
+          <div id="bmi-badge" style="display:none" class="registered-badge">✓ REGISTERED</div>
+          <div class="pro-name">BMI</div>
+          <div class="pro-type">For-Profit (since 2022) · Founded 1939</div>
+          <div class="pro-stat">Members: <span>1.4 Million+</span></div>
+          <div class="pro-stat">Catalog: <span>22.4M+ works</span></div>
+          <div class="pro-stat">Writer Reg: <span>FREE</span></div>
+          <div class="pro-stat">Royalty type: <span>Performance</span></div>
+          <div class="pro-stat">Pay schedule: <span>Quarterly (2026)</span></div>
+          <div style="margin-top:12px;font-size:11px;color:var(--muted);line-height:1.6;">Largest PRO by catalog. Went for-profit in 2022. Free for writers — publishers pay $150 fee.</div>
+        </div>
+        <div class="pro-card" data-pro="SESAC" onclick="registerPRO('sesac')">
+          <div id="sesac-badge" style="display:none" class="registered-badge">✓ REGISTERED</div>
+          <div class="pro-name">SESAC</div>
+          <div class="pro-type">Invite-Only · For-Profit</div>
+          <div class="pro-stat">Model: <span>Invite-only</span></div>
+          <div class="pro-stat">Known for: <span>Precise analytics</span></div>
+          <div class="pro-stat">Notable: <span>Bob Dylan, Adele</span></div>
+          <div class="pro-stat">Structure: <span>Privately owned</span></div>
+          <div class="pro-stat">Advantage: <span>Higher accuracy</span></div>
+          <div style="margin-top:12px;font-size:11px;color:var(--muted);line-height:1.6;">Smallest but most selective. Uses data-driven royalty calculations. Invitation required.</div>
+        </div>
+        <div class="pro-card" data-pro="SGACE" onclick="registerPRO('sgacedom')">
+          <div id="sgacedom-badge" style="display:none" class="registered-badge">✓ REGISTERED</div>
+          <div class="pro-name">SGACEDOM</div>
+          <div class="pro-type">Dominican Republic · CISAC Member</div>
+          <div class="pro-stat">Covers: <span>DR + Ley 65-00</span></div>
+          <div class="pro-stat">Rights: <span>Performance + Mechanical</span></div>
+          <div class="pro-stat">Required for: <span>DR events</span></div>
+          <div class="pro-stat">UNESCO: <span>Merengue + Bachata</span></div>
+          <div class="pro-stat">Network: <span>LATINAUTOR reciprocal</span></div>
+          <div style="margin-top:12px;font-size:11px;color:var(--muted);line-height:1.6;">Required to collect royalties in the Dominican Republic under Ley 65-00 (2000).</div>
+        </div>
+        <div class="pro-card" data-pro="SAYCE" onclick="registerPRO('sayce')">
+          <div id="sayce-badge" style="display:none" class="registered-badge">✓ REGISTERED</div>
+          <div class="pro-name">SAYCE</div>
+          <div class="pro-type">Ecuador · CISAC/LATINAUTOR Member</div>
+          <div class="pro-stat">Founded: <span>1973</span></div>
+          <div class="pro-stat">Members: <span>3,000+</span></div>
+          <div class="pro-stat">Law: <span>Código Ingenios 2016</span></div>
+          <div class="pro-stat">Unique: <span>Triple-stack system</span></div>
+          <div class="pro-stat">Partners: <span>SARIME + SOPROFON</span></div>
+          <div style="margin-top:12px;font-size:11px;color:var(--muted);line-height:1.6;">Part of Ecuador's unique three-society system. ANY public performance requires SAYCE authorization.</div>
+        </div>
+        <div class="pro-card" data-pro="MLC" onclick="registerPRO('mlc')">
+          <div id="mlc-badge" style="display:none" class="registered-badge">✓ REGISTERED</div>
+          <div class="pro-name">The MLC</div>
+          <div class="pro-type">Mechanical Licensing Collective · USA</div>
+          <div class="pro-stat">Created by: <span>Music Modernization Act 2018</span></div>
+          <div class="pro-stat">Covers: <span>Streaming mechanicals</span></div>
+          <div class="pro-stat">Registration: <span>FREE</span></div>
+          <div class="pro-stat">DSPs: <span>Spotify, Apple, Amazon</span></div>
+          <div class="pro-stat">Pays: <span>Monthly</span></div>
+          <div style="margin-top:12px;font-size:11px;color:var(--muted);line-height:1.6;">Collects mechanical royalties from all US streaming platforms. Required to get your full royalty stack.</div>
+        </div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:20px;">
+        <div style="font-family:'Bebas Neue',cursive;font-size:20px;color:var(--gold);margin-bottom:8px;letter-spacing:0.08em;">📖 INDUSTRY LAW: ONE PRO RULE</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.7;">You can only register with ONE PRO in the USA (ASCAP, BMI, or SESAC) at a time — but you need The MLC separately for mechanical royalties from streaming. For international markets, register with the local PRO in each country you release in.</div>
+      </div>
+    </div>
+
+    <!-- ── VENUES PANEL ── -->
+    <div class="panel" id="panel-venues">
+      <div class="panel-title" id="venuePanelTitle">ATLANTA VENUES</div>
+      <div class="panel-sub">Book shows to earn performance income and build your local fanbase. Bigger venues = more money, but you need the stats to fill them.</div>
+      <div class="venue-list" id="venueList"></div>
+    </div>
+
+    <!-- ── EDUCATION PANEL ── -->
+    <div class="panel" id="panel-education">
+      <div class="panel-title">MUSIC INDUSTRY EDUCATION</div>
+      <div class="panel-sub">Real laws. Real rights. Real money. Learn what the game never tells you.</div>
+      <div class="cards-grid">
+        <div class="game-card" onclick="showLesson('copyright')">
+          <div class="card-icon">©️</div>
+          <div class="card-title">Copyright Act of 1976</div>
+          <div class="card-desc">The foundation of US music law. Learn your 6 exclusive rights and how to protect your work.</div>
+          <div class="card-reward">+30 XP · Unlocks PRO knowledge</div>
+        </div>
+        <div class="game-card" onclick="showLesson('dmca')">
+          <div class="card-icon">🛡️</div>
+          <div class="card-title">DMCA & Safe Harbor</div>
+          <div class="card-desc">How YouTube, TikTok, and Meta use Section 512 to avoid liability — and what it means for your content.</div>
+          <div class="card-reward">+30 XP · Unlocks digital strategy</div>
+        </div>
+        <div class="game-card" onclick="showLesson('mma')">
+          <div class="card-icon">🎵</div>
+          <div class="card-title">Music Modernization Act</div>
+          <div class="card-desc">The 2018 law that created The MLC and changed streaming royalty collection forever.</div>
+          <div class="card-reward">+30 XP · Unlocks MLC registration</div>
+        </div>
+        <div class="game-card" onclick="showLesson('360')">
+          <div class="card-icon">💿</div>
+          <div class="card-title">360 Deals</div>
+          <div class="card-desc">Labels want a cut of EVERYTHING now — tours, merch, endorsements. Know before you sign.</div>
+          <div class="card-reward">+30 XP · Unlocks contract reading</div>
+        </div>
+        <div class="game-card" onclick="showLesson('termination')">
+          <div class="card-icon">⚖️</div>
+          <div class="card-title">35-Year Termination Rights</div>
+          <div class="card-desc">After 35 years, you can reclaim your masters under US law. Prince knew it. Now you do too.</div>
+          <div class="card-reward">+30 XP · Unlocks legacy planning</div>
+        </div>
+        <div class="game-card" onclick="showLesson('ley6500')">
+          <div class="card-icon">🇩🇴</div>
+          <div class="card-title">Dominican Rep: Ley 65-00</div>
+          <div class="card-desc">The DR copyright law of 2000. Moral rights are PERPETUAL here — even heirs can't waive them.</div>
+          <div class="card-reward">+30 XP · Unlocks DR region</div>
+        </div>
+        <div class="game-card" onclick="showLesson('ingenios')">
+          <div class="card-icon">🇪🇨</div>
+          <div class="card-title">Ecuador: Código Ingenios</div>
+          <div class="card-desc">Ecuador's 2016 IP law requires a TRIPLE license stack for any public performance. Learn why.</div>
+          <div class="card-reward">+30 XP · Unlocks Ecuador region</div>
+        </div>
+        <div class="game-card" onclick="showLesson('youtube')">
+          <div class="card-icon">▶️</div>
+          <div class="card-title">YouTube Content ID</div>
+          <div class="card-desc">How the Monetize/Track/Block system works — and how to use it to your advantage.</div>
+          <div class="card-reward">+30 XP · Unlocks digital royalties</div>
+        </div>
+        <div class="game-card" onclick="showLesson('ai_music')">
+          <div class="card-icon">🤖</div>
+          <div class="card-title">AI Music Policy (2025)</div>
+          <div class="card-desc">ASCAP, BMI & SOCAN's joint policy: partially AI = eligible. Fully AI = NOT eligible for PRO royalties.</div>
+          <div class="card-reward">+30 XP · Unlocks AI track compliance</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /hub -->
+
+<!-- ═══════════════════════════════════════════════
+     MODAL
+═══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal-box" id="modalBox">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// PARTICLES
+// ═══════════════════════════════════════════════
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let particles = [];
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+for (let i = 0; i < 60; i++) {
+  particles.push({
+    x: Math.random() * window.innerWidth,
+    y: Math.random() * window.innerHeight,
+    r: Math.random() * 1.5 + 0.3,
+    dx: (Math.random() - 0.5) * 0.3,
+    dy: -Math.random() * 0.4 - 0.1,
+    opacity: Math.random() * 0.4 + 0.1
+  });
+}
+
+function animParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach(p => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255,215,0,${p.opacity})`;
+    ctx.fill();
+    p.x += p.dx; p.y += p.dy;
+    if (p.y < -10) { p.y = canvas.height + 10; p.x = Math.random() * canvas.width; }
+  });
+  requestAnimationFrame(animParticles);
+}
+animParticles();
+
+// ═══════════════════════════════════════════════
+// GAME STATE
+// ═══════════════════════════════════════════════
+let G = {
+  name: '', genre: '', city: '', photo: null, region: 'atlanta',
+  level: 1, xp: 0, xpMax: 200,
+  money: 500, streams: 0, following: 0,
+  dripScore: 0, streetCred: 0,
+  ownedBrands: [],
+  registeredPROs: [],
+  completedActions: [],
+  completedLessons: []
+};
+
+let selectedGenre = '';
+
+// ═══════════════════════════════════════════════
+// SCREENS
+// ═══════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function handlePhoto(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    G.photo = ev.target.result;
+    const img = document.getElementById('photoPreview');
+    img.src = G.photo;
+    img.style.display = 'block';
+    document.getElementById('photoPlaceholder').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function selectGenre(el, genre) {
+  document.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedGenre = genre;
+}
+
+function createCharacter() {
+  const name = document.getElementById('artistName').value.trim();
+  const city = document.getElementById('artistCity').value.trim();
+  const region = document.getElementById('startRegion').value;
+  if (!name) { toast('Enter your artist name!', 'error'); return; }
+  G.name = name;
+  G.city = city || 'NYC';
+  G.genre = selectedGenre || 'Hip-Hop';
+  G.region = region;
+  showScreen('intro');
+  runIntro();
+}
+
+// ═══════════════════════════════════════════════
+// INTRO CINEMATIC
+// ═══════════════════════════════════════════════
+const introLines = [
+  () => `THE MUSIC INDUSTRY GENERATES $28 BILLION A YEAR.`,
+  () => `MOST ARTISTS SEE LESS THAN 1% OF IT.`,
+  () => `${G.name.toUpperCase()} FROM ${G.city.toUpperCase()} IS ABOUT TO CHANGE THAT.`,
+  () => `LEARN THE LAWS. OWN YOUR MASTERS. BUILD YOUR EMPIRE.`,
+  () => `YOUR WORLD STAGE STARTS NOW.`
+];
+let introIdx = 0;
+
+function runIntro() {
+  introIdx = 0;
+  showIntroLine();
+}
+function showIntroLine() {
+  if (introIdx >= introLines.length) { startGame(); return; }
+  const el = document.getElementById('introText');
+  el.style.animation = 'none';
+  el.textContent = introLines[introIdx]();
+  void el.offsetWidth;
+  el.style.animation = 'fadeInOut 3s ease forwards';
+  introIdx++;
+  setTimeout(showIntroLine, 3000);
+}
+function startGame() {
+  showScreen('hub');
+  initHub();
+}
+
+// ═══════════════════════════════════════════════
+// HUB INIT
+// ═══════════════════════════════════════════════
+const REGION_DATA = {
+  atlanta:      { name: 'Atlanta, GA', sub: 'Heart of trap music. ASCAP/BMI registration events. Grind starts here.', flag: '🇺🇸', color: 'var(--atlanta)' },
+  nashville:    { name: 'Nashville, TN', sub: 'Country publishing capital. CMA Awards, songwriting deals, and sync licensing gold.', flag: '🇺🇸', color: 'var(--nashville)' },
+  santo_domingo:{ name: 'Santo Domingo', sub: 'DR music capital. Register with SGACEDOM under Ley 65-00. Moral rights are PERPETUAL here.', flag: '🇩🇴', color: 'var(--dr)' },
+  quito:        { name: 'Quito, Ecuador', sub: 'Triple-stack licensing: SAYCE + SARIME + SOPROFON. Every public event needs SAYCE authorization.', flag: '🇪🇨', color: 'var(--ecuador)' },
+  guayaquil:    { name: 'Guayaquil, Ecuador', sub: 'Cumbia costeña & Afro-Ecuadorian culture. Estadio Monumental holds 59K.', flag: '🇪🇨', color: 'var(--ecuador)' }
+};
+
+function initHub() {
+  const av = document.getElementById('sidebarAvatar');
+  if (G.photo) { av.src = G.photo; }
+  else { av.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(G.name)}&background=1a1a26&color=FFD700&size=72`; }
+  document.getElementById('sidebarName').textContent = G.name.toUpperCase();
+  document.getElementById('sidebarGenre').textContent = G.genre;
+  updateRegionUI();
+  buildBrandGrid();
+  buildVenueList();
+  updateStats();
+  toast(`Welcome to the game, ${G.name}! Start by recording a track.`);
+}
+
+function updateRegionUI() {
+  const r = REGION_DATA[G.region] || REGION_DATA.atlanta;
+  document.getElementById('careerRegionTitle').textContent = r.name.toUpperCase();
+  document.getElementById('careerRegionSub').textContent = r.sub;
+  document.getElementById('venuePanelTitle').textContent = r.name.toUpperCase() + ' VENUES';
+}
+
+// ═══════════════════════════════════════════════
+// STATS UPDATE
+// ═══════════════════════════════════════════════
+function updateStats() {
+  document.getElementById('statMoney').textContent = '$' + G.money.toLocaleString();
+  document.getElementById('statStreams').textContent = fmtNum(G.streams);
+  document.getElementById('statFollow').textContent = fmtNum(G.following);
+  document.getElementById('statDrip').textContent = G.dripScore;
+  document.getElementById('statCred').textContent = G.streetCred;
+  document.getElementById('sidebarMoney').textContent = '$' + G.money.toLocaleString();
+  document.getElementById('sidebarLevel').textContent = 'LEVEL ' + G.level;
+  document.getElementById('barStreams').style.width = Math.min(100, (G.streams / 50000) * 100) + '%';
+  document.getElementById('barFollow').style.width = Math.min(100, (G.following / 10000) * 100) + '%';
+  document.getElementById('barDrip').style.width = G.dripScore + '%';
+  document.getElementById('barCred').style.width = Math.min(100, (G.streetCred / 100) * 100) + '%';
+  document.getElementById('xpBar').style.width = ((G.xp / G.xpMax) * 100) + '%';
+  document.getElementById('dripScoreBig').textContent = G.dripScore;
+  document.getElementById('dripBarFill').style.width = G.dripScore + '%';
+  document.getElementById('dripTierLabel').textContent = getDripTier(G.dripScore);
+}
+
+function fmtNum(n) {
+  if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n/1000).toFixed(1) + 'K';
+  return n.toString();
+}
+
+function getDripTier(score) {
+  if (score >= 85) return '👑 NYC LEGEND';
+  if (score >= 65) return '💎 FASHION ICON';
+  if (score >= 45) return '✨ ELEVATED';
+  if (score >= 20) return '🔥 STREET CERTIFIED';
+  return '👟 No Drip Yet';
+}
+
+function addXP(amount) {
+  G.xp += amount;
+  if (G.xp >= G.xpMax) {
+    G.level++;
+    G.xp = G.xp - G.xpMax;
+    G.xpMax = Math.floor(G.xpMax * 1.4);
+    showModal('levelUp', { level: G.level });
+  }
+  updateStats();
+}
+
+// ═══════════════════════════════════════════════
+// PANELS
+// ═══════════════════════════════════════════════
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+// ═══════════════════════════════════════════════
+// ACTIONS
+// ═══════════════════════════════════════════════
+const ACTIONS = {
+  record:     { cost:0,   streams:500,  follow:50,   money:200,  xp:50,  cred:2,  title:'Track Recorded!', law:'Under the Copyright Act of 1976, your recording is protected the moment it\'s fixed in tangible form. You own a copyright in BOTH the composition (melody + lyrics) and the sound recording (master). Register with the Copyright Office for $35 to enforce it in court.' },
+  social:     { cost:0,   streams:100,  follow:200,  money:0,    xp:30,  cred:1,  drip:5, title:'Posted Up!', law:'TikTok and Instagram operate under DMCA Safe Harbor (Section 512). They can\'t be held liable for user uploads — but YOU can. Posting a cover song without a sync license can trigger a DMCA takedown. Use platforms that have blanket licenses, or only post original music.' },
+  collab:     { cost:100, streams:1200, follow:300,  money:0,    xp:80,  cred:3,  title:'Collab Done!', law:'When you collaborate, you\'re creating a Joint Work under 17 U.S.C. § 101. Both writers share equal ownership by default — unless your contract says otherwise. ALWAYS get a split sheet signed before you release. 50/50 is the standard starting point.' },
+  sync:       { cost:50,  streams:0,    follow:300,  money:800,  xp:60,  cred:2,  title:'Sync Deal!', law:'A sync license grants permission to use your composition WITH visual media. You need TWO licenses: a Sync License for the composition (from the publisher) and a Master License for the recording (from you or your label). Micro-sync on TikTok averages $0.03 per 1,000 creations.' },
+  distributor:{ cost:23,  streams:2000, follow:100,  money:150,  xp:100, cred:1,  title:'Live on DSPs!', law:'Digital distributors like DistroKid ($22.99/yr) or TuneCore put your music on all streaming platforms. They collect both performance royalties (via your PRO) and mechanical royalties (via The MLC under the Music Modernization Act 2018). You own 100% of your masters.' },
+  manager:    { cost:200, streams:0,    follow:500,  money:600,  xp:70,  cred:2,  title:'Manager Hired!', law:'A standard manager deal is 15–20% of gross income (360 deal) or net income (traditional deal). The key clause is the "sunset clause" — does the manager get their % on deals THEY brought AFTER you fire them? Industry standard is 3–5 years sunset on active deals.' }
+};
+
+function doAction(key) {
+  const a = ACTIONS[key];
+  if (G.money < a.cost) { toast(`Need $${a.cost} for this!`, 'error'); return; }
+  G.money    -= a.cost;
+  G.streams  += a.streams;
+  G.following+= a.follow;
+  G.money    += a.money;
+  G.streetCred+= a.cred || 0;
+  G.dripScore = Math.min(100, G.dripScore + (a.drip||0));
+  addXP(a.xp);
+  showModal('action', { title: a.title, law: a.law, money: a.money, streams: a.streams, follow: a.follow });
+}
+
+// ═══════════════════════════════════════════════
+// TRAVEL
+// ═══════════════════════════════════════════════
+function travelTo(region) {
+  const r = REGION_DATA[region];
+  if (!r) return;
+  const reqLevels = { nashville:4, santo_domingo:3, quito:3, guayaquil:5, atlanta:1 };
+  const req = reqLevels[region] || 1;
+  if (G.level < req) {
+    toast(`Need Level ${req} to travel to ${r.name}`, 'error');
+    return;
+  }
+  G.region = region;
+  updateRegionUI();
+  buildVenueList();
+  showPanel('career');
+  // Close map, reopen career
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('panel-career').classList.add('active');
+  document.querySelector('.nav-link').classList.add('active');
+  toast(`✈️ Arrived in ${r.flag} ${r.name}!`);
+}
+
+// ═══════════════════════════════════════════════
+// BRANDS
+// ═══════════════════════════════════════════════
+const BRANDS = [
+  { id:'only_ny',  name:'Only NY',        founder:'NYC Collective, 2007',    tier:'streetwear',     drip:10, cred:18, price:180,  minDrip:0,  desc:'Real NYC streetwear for real New Yorkers. LES flagship.' },
+  { id:'wu_wear',  name:'Wu Wear',         founder:'RZA / Wu-Tang, 1995',     tier:'streetwear',     drip:14, cred:22, price:180,  minDrip:5,  desc:'First rapper-owned brand. Brooklyn/Staten Island OG.' },
+  { id:'supreme',  name:'Supreme',         founder:'James Jebbia, 1994',      tier:'streetwear',     drip:18, cred:20, price:400,  minDrip:15, desc:'Lafayette St, SoHo. Drop culture invented here.' },
+  { id:'hellstar',  name:'Hellstar',       founder:'Sean Holland, 2020',      tier:'streetwear',     drip:20, cred:17, price:500,  minDrip:18, desc:'Gen-Z NYC brand. Dark mystical graphics. TikTok essential.' },
+  { id:'sp5der',   name:'Sp5der',          founder:'Gunna, 2021',             tier:'streetwear',     drip:16, cred:15, price:450,  minDrip:15, desc:'NYC x Atlanta pipeline. Neon web motifs. Ranked #14 Complex 2025.' },
+  { id:'awake_ny', name:'Awake NY',        founder:'Angelo Baque, 2012',      tier:'luxury_street',  drip:18, cred:16, price:700,  minDrip:28, desc:'Former Supreme Brand Dir. LES. Political + multicultural graphics.' },
+  { id:'noah_nyc', name:'Noah NYC',        founder:'Brendon Babenzien, 2015', tier:'luxury_street',  drip:16, cred:12, price:600,  minDrip:25, desc:'Post-Supreme downtown. Sustainability + skate. Nolita flagship.' },
+  { id:'kith',     name:'KITH',            founder:'Ronnie Fieg, 2011',       tier:'luxury_street',  drip:22, cred:15, price:1200, minDrip:30, desc:'Brooklyn to global. KITH Treats bar. Collab kings.' },
+  { id:'ald',      name:'Aimé Leon Dore',  founder:'Teddy Santis, 2014',      tier:'luxury_street',  drip:24, cred:14, price:1000, minDrip:35, desc:'Queens luxury. Basketball + 90s hip-hop. Mulberry St Nolita.' },
+  { id:'denim_tears',name:'Denim Tears',   founder:'Tremaine Emory, 2019',    tier:'luxury_street',  drip:26, cred:24, price:900,  minDrip:45, desc:'Black history in fashion. Cotton wreath. Ranked #8 Complex 2025.' },
+  { id:'gucci',    name:'Gucci',           founder:'Dapper Dan era NYC 80s',  tier:'high_fashion',   drip:32, cred:20, price:3000, minDrip:55, desc:'Harlem-Gucci reconciliation = fashion history. Madison Ave.' },
+  { id:'thom_browne',name:'Thom Browne',   founder:'Thom Browne, 2001',       tier:'high_fashion',   drip:30, cred:12, price:5000, minDrip:58, desc:'Tribeca NYC. Doechii\'s 2025 Grammy: $6.3M media impact value.' },
+  { id:'dapper_dan',name:'Dapper Dan',     founder:'Daniel Day, 1982',        tier:'icon',           drip:40, cred:40, price:15000,minDrip:70, desc:'Harlem atelier. 125th St. Dressed LL Cool J, Jay-Z, Cardi B. THE legend.' }
+];
+
+function buildBrandGrid() {
+  const grid = document.getElementById('brandGrid');
+  grid.innerHTML = BRANDS.map(b => {
+    const owned = G.ownedBrands.includes(b.id);
+    const locked = G.dripScore < b.minDrip && !owned;
+    return `<div class="brand-card ${owned?'owned':''} ${locked?'locked-brand':''}" onclick="${locked?`toast('Need ${b.minDrip} Drip Score to unlock!','error')`:`buyBrand('${b.id}')`}">
+      ${owned ? '<div class="owned-check">✓</div>' : ''}
+      <div class="brand-tier-tag tier-${b.tier}">${b.tier.replace('_',' ')}</div>
+      <div class="brand-name">${b.name}</div>
+      <div class="brand-founder">${b.founder}</div>
+      <div class="brand-drip">+${b.drip} Drip · +${b.cred} Cred</div>
+      <div class="brand-price">${owned ? '✓ OWNED' : '$'+b.price.toLocaleString()}</div>
+    </div>`;
+  }).join('');
+}
+
+function buyBrand(id) {
+  if (G.ownedBrands.includes(id)) { toast('Already in your wardrobe!'); return; }
+  const b = BRANDS.find(x => x.id === id);
+  if (!b) return;
+  if (G.money < b.price) { toast(`Need $${b.price.toLocaleString()} to buy ${b.name}!`, 'error'); return; }
+  G.money -= b.price;
+  G.ownedBrands.push(b.id);
+  G.dripScore = Math.min(100, G.dripScore + b.drip);
+  G.streetCred += b.cred;
+  addXP(40);
+  buildBrandGrid();
+  updateStats();
+  showModal('brand', { brand: b });
+}
+
+// ═══════════════════════════════════════════════
+// VENUES
+// ═══════════════════════════════════════════════
+const VENUES_BY_REGION = {
+  atlanta: [
+    { name:'Vortex Open Mic',     cap:'80',      fee:50,   req:1,  desc:'Start here. Locals only but real energy.' },
+    { name:'Magic City Lounge',   cap:'300',     fee:300,  req:2,  desc:'ATL staple. Networking gold.' },
+    { name:'Tabernacle',          cap:'2,600',   fee:2500, req:4,  desc:'Mid-tier ATL venue. Historic building.' },
+    { name:'State Farm Arena',    cap:'21,000',  fee:25000,req:8,  desc:'ATL\'s biggest arena. BET Hip Hop Awards.' }
+  ],
+  nashville: [
+    { name:'Lower Broadway Bar',  cap:'200',     fee:80,   req:1,  desc:'Honky-tonk row. Tourist + local mix.' },
+    { name:'Station Inn',         cap:'150',     fee:150,  req:2,  desc:'Legendary bluegrass + americana joint.' },
+    { name:'Ryman Auditorium',    cap:'2,300',   fee:3000, req:5,  desc:'Mother Church of Country Music.' },
+    { name:'Grand Ole Opry',      cap:'4,400',   fee:8000, req:7,  desc:'The most famous stage in country music.' }
+  ],
+  santo_domingo: [
+    { name:'Malecón Open Mic',    cap:'200',     fee:60,   req:1,  desc:'Beachfront vibes. Merengue essential.' },
+    { name:'Club Merengue',       cap:'400',     fee:400,  req:2,  desc:'Classic Dominican nightclub.' },
+    { name:'Plaza España',        cap:'3,000',   fee:2800, req:4,  desc:'Colonial Zone outdoor venue. UNESCO area.' },
+    { name:'Estadio Olímpico',    cap:'28,000',  fee:20000,req:7,  desc:'DR\'s biggest stage. Festival del Merengue.' }
+  ],
+  quito: [
+    { name:'La Floresta Open Mic',cap:'60',      fee:40,   req:1,  desc:'Bohemian neighborhood. Indie + folk.' },
+    { name:'Bar El Pobre Diablo', cap:'250',     fee:250,  req:2,  desc:'Quito\'s most beloved jazz & roots bar.' },
+    { name:'Casa de la Cultura',  cap:'1,200',   fee:1200, req:4,  desc:'Ecuador\'s cultural heart. Pasillo legends.' },
+    { name:'Estadio Rodrigo Paz', cap:'42,000',  fee:18000,req:7,  desc:'Quito\'s massive stadium. Quito Fest.' }
+  ],
+  guayaquil: [
+    { name:'Club Urdesa',         cap:'350',     fee:350,  req:2,  desc:'Costa vibes. Cumbia every night.' },
+    { name:'Malecón 2000',        cap:'5,000',   fee:4000, req:4,  desc:'Waterfront promenade concert space.' },
+    { name:'Centro Cívico',       cap:'8,500',   fee:9000, req:6,  desc:'Guayaquil\'s premier indoor arena.' },
+    { name:'Estadio Monumental',  cap:'59,000',  fee:45000,req:9,  desc:'Largest stadium in Ecuador. 59K capacity.' }
+  ]
+};
+
+function buildVenueList() {
+  const venues = VENUES_BY_REGION[G.region] || VENUES_BY_REGION.atlanta;
+  const list = document.getElementById('venueList');
+  list.innerHTML = venues.map(v => {
+    const locked = G.level < v.req;
+    return `<div class="venue-row ${locked?'locked-venue':''}" onclick="${locked?`toast('Need Level ${v.req} for this venue!','error')`:`bookVenue('${v.name}',${v.fee},${v.req})`}">
+      <div class="venue-cap"><div>${v.cap}</div><div class="venue-cap-label">Capacity</div></div>
+      <div class="venue-info">
+        <div class="venue-name">${v.name}</div>
+        <div class="venue-city">${v.desc}</div>
+        ${locked ? `<div class="venue-req">🔒 Requires Level ${v.req}</div>` : ''}
+      </div>
+      <div>
+        <div class="venue-fee">+$${v.fee.toLocaleString()}</div>
+        <div style="font-size:10px;color:var(--muted)">per show</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function bookVenue(name, fee, req) {
+  const follow_boost = Math.floor(fee * 0.8);
+  G.money += fee;
+  G.following += follow_boost;
+  G.streetCred += 5;
+  addXP(60);
+  updateStats();
+  showModal('venue', { name, fee, follow: follow_boost });
+}
+
+// ═══════════════════════════════════════════════
+// PRO REGISTRATION
+// ═══════════════════════════════════════════════
+function registerPRO(id) {
+  if (G.registeredPROs.includes(id)) { toast('Already registered!'); return; }
+  const usaPROs = ['ascap','bmi','sesac'];
+  const alreadyUSA = G.registeredPROs.some(p => usaPROs.includes(p));
+  if (usaPROs.includes(id) && alreadyUSA) {
+    toast('One PRO Rule: You\'re already registered with a US PRO!', 'error');
+    return;
+  }
+  G.registeredPROs.push(id);
+  document.getElementById(id + '-badge').style.display = 'block';
+  G.money += 300;
+  addXP(80);
+  updateStats();
+  const names = { ascap:'ASCAP',bmi:'BMI',sesac:'SESAC',sgacedom:'SGACEDOM',sayce:'SAYCE',mlc:'The MLC' };
+  showModal('pro', { id, name: names[id] || id.toUpperCase() });
+}
+
+// ═══════════════════════════════════════════════
+// LESSONS
+// ═══════════════════════════════════════════════
+const LESSONS = {
+  copyright: {
+    icon:'©️', title:'Copyright Act of 1976',
+    body:`<p>The Copyright Act of 1976 (17 U.S.C.) is the bedrock of US music law. Your song is automatically protected the moment it's "fixed in tangible form" — recorded, written down, or saved to a file.</p>
+    <div class="modal-law-box">📜 <strong>Your 6 Exclusive Rights (Section 106):</strong><br><br>1. Reproduce the work<br>2. Prepare derivative works<br>3. Distribute copies<br>4. Perform publicly<br>5. Display publicly<br>6. Digital audio transmission (Section 106A)</div>
+    <p>You have TWO copyrights in every song: (1) the <strong>composition</strong> (melody + lyrics) and (2) the <strong>sound recording</strong> (the master). They're separate — and both are valuable.</p>
+    <div class="modal-law-box">💡 <strong>Pro Tip:</strong> Register with the US Copyright Office (copyright.gov) for $35–$65. Without registration, you can't sue for statutory damages ($750–$150,000 per infringement).</div>`
+  },
+  dmca: {
+    icon:'🛡️', title:'DMCA & Safe Harbor (Section 512)',
+    body:`<p>The Digital Millennium Copyright Act (1998) created the Safe Harbor provision that protects platforms like YouTube, TikTok, and Instagram from liability — AS LONG AS they respond to takedown notices.</p>
+    <div class="modal-law-box">📜 <strong>How Section 512 Works:</strong><br><br>• Platform receives DMCA notice → must take down infringing content<br>• Platform gets counter-notice → must restore if no lawsuit filed in 10 days<br>• Cox Communications v. Sony Music (2026) — ISPs now face stronger secondary liability if they don't terminate repeat infringers</div>
+    <p>For you as an artist: YouTube's Content ID automatically scans uploads and can <strong>Monetize, Track, or Block</strong> your content. Register your works to get your royalties.</p>
+    <div class="modal-law-box">⚠️ <strong>Warning:</strong> Posting a cover on Instagram can get you muted via Meta's Rights Manager — even during a live stream. Always check if the song is cleared.</div>`
+  },
+  mma: {
+    icon:'🎵', title:'Music Modernization Act (2018)',
+    body:`<p>The Music Modernization Act (MMA) of 2018 was the most significant update to US music copyright law since 1976. It created <strong>The MLC (Mechanical Licensing Collective)</strong> to handle streaming mechanical royalties.</p>
+    <div class="modal-law-box">📜 <strong>3 Key Titles of the MMA:</strong><br><br><strong>Title I</strong> — Created The MLC. All streaming services pay blanket mechanical licenses. MLC distributes to rights holders.<br><br><strong>Title II</strong> — SoundExchange now pays pre-1972 recordings (artists like Chuck Berry get digital radio royalties for the first time).<br><br><strong>Title III</strong> — Producers, mixers, and sound engineers can now register for royalties directly.</div>
+    <p>Before the MMA, streaming services had billions in <em>unclaimed mechanical royalties</em> sitting in "black boxes." The MLC was created to fix that.</p>`
+  },
+  '360': {
+    icon:'💿', title:'360 Deals — Know Before You Sign',
+    body:`<p>A 360 Deal (Multi-Rights Deal) means the label takes a percentage of EVERYTHING — not just record sales, but touring income, merchandise, endorsements, acting deals, even your YouTube channel.</p>
+    <div class="modal-law-box">📜 <strong>Typical 360 Cut:</strong><br><br>• Tours/concerts: 10–15%<br>• Merchandise: 10–25%<br>• Endorsements: 10–25%<br>• Publishing: 50% of publishing split<br>• Acting/TV: 10–15%<br>• YouTube/social: 10–25%</div>
+    <p>Labels started pushing 360 deals in the 2000s as album sales collapsed. Today, almost every major label deal includes some 360 language.</p>
+    <div class="modal-law-box">💡 <strong>Negotiation Tips:</strong><br>• Limit 360 to only the income streams the label actively helps generate<br>• Add a sunset clause — 360 participation ends 3 years after label relationship<br>• Keep your publishing separate if possible<br>• Never sign without an entertainment attorney</div>`
+  },
+  termination: {
+    icon:'⚖️', title:'35-Year Termination Rights (Section 203)',
+    body:`<p>Under 17 U.S.C. § 203, creators can reclaim rights they signed away — after 35 years, and with 2 years advance notice. This is one of the most powerful and underused tools in music law.</p>
+    <div class="modal-law-box">📜 <strong>How It Works:</strong><br><br>• Applies to grants of copyright made on or after January 1, 1978<br>• Window opens: 35 years after the grant (or 35 years after publication, whichever is earlier)<br>• Notice must be filed 2–10 years before reclamation date<br>• Work-for-hire assignments CANNOT be terminated</div>
+    <p>This is why Prince fought for his masters. Why Taylor Swift re-recorded her albums. Starting in 2013, artists who signed deals in the late 1970s began reclaiming their rights.</p>
+    <div class="modal-law-box">⚠️ <strong>Watch Out:</strong> Labels try to argue some recordings are "works for hire" — which would block termination rights. Courts generally side with artists when the artist was an independent contractor, not an employee.</div>`
+  },
+  ley6500: {
+    icon:'🇩🇴', title:'Dominican Republic: Ley 65-00',
+    body:`<p>Ley 65-00 (2000), amended under CAFTA-DR (2006), is the Dominican Republic's primary copyright law. It's modeled on European-style copyright — with much stronger moral rights than US law.</p>
+    <div class="modal-law-box">📜 <strong>Key Provisions:</strong><br><br>• <strong>Moral Rights:</strong> PERPETUAL and INALIENABLE — even heirs cannot waive them<br>• <strong>Economic Rights:</strong> Life + 50 years (performers), 50 years (phonograms), 25 years (broadcasters)<br>• <strong>Registration:</strong> Via ONDA (government body, 30-day processing)<br>• <strong>PRO:</strong> SGACEDOM — handles both performance AND mechanical rights<br>• <strong>CAFTA-DR:</strong> Digital anti-circumvention rules, similar to US DMCA</div>
+    <p>UNESCO recognized Merengue (2016) and Bachata (2019) as Intangible Cultural Heritage — giving these DR music forms special international protection.</p>
+    <div class="modal-law-box">🚨 <strong>Recent News:</strong> Operation Domo (2025) — a joint US HSI + DR enforcement operation took down IPTV66, a streaming piracy network. First major DR/US coordinated IP enforcement action.</div>`
+  },
+  ingenios: {
+    icon:'🇪🇨', title:"Ecuador: Código Ingenios (2016)",
+    body:`<p>Ecuador's Código Orgánico de la Economía Social de los Conocimientos, Creatividad e Innovación (Código Ingenios, 2016) replaced the older IP law and introduced a unique three-society licensing system.</p>
+    <div class="modal-law-box">📜 <strong>The Triple Stack:</strong><br><br>• <strong>SAYCE</strong> — Authors & composers (performance + mechanical)<br>• <strong>SARIME</strong> — Performing artists' rights<br>• <strong>SOPROFON</strong> — Phonogram producers' rights<br><br>Every public performance in Ecuador requires authorization from ALL THREE societies.</div>
+    <p>Even a single live performance requires a SAYCE license. The minimum rate is $4.56 for 1–10 musical works performed at any public event.</p>
+    <div class="modal-law-box">🌱 <strong>Buen Vivir (Sumak Kawsay):</strong> Ecuador's constitution includes the indigenous concept of "Good Living" — which requires IP law to protect both individual creators AND collective/indigenous cultural heritage. Traditional Kichwa music receives special protection.</div>
+    <p>Registration is handled by SENADI (Sistema Ecuatoriano de Propiedad Intelectual), which replaced IEPI. SENADI can issue administrative orders blocking infringing content without going to court.</p>`
+  },
+  youtube: {
+    icon:'▶️', title:'YouTube Content ID System',
+    body:`<p>YouTube's Content ID is an automated copyright management system that scans every upload against a database of registered content. Rights holders can choose three actions:</p>
+    <div class="modal-law-box">📜 <strong>Content ID Actions:</strong><br><br>• <strong>Monetize:</strong> Ads run on the video — revenue goes to rights holder, not uploader<br>• <strong>Track:</strong> YouTube sends analytics to rights holder; no monetization claim<br>• <strong>Block:</strong> Video is made unavailable in specific countries or globally<br><br>Geography-specific blocking means a video can be blocked in the US but visible in Ecuador.</div>
+    <p>Content ID is available to rights holders with large catalogs — individual artists must go through a Content ID partner like DistroKid or TuneCore to register.</p>
+    <div class="modal-law-box">💡 <strong>Pro Tip:</strong> Register your catalog with Content ID BEFORE releasing. If someone uploads your music first and claims it with Content ID, you'll have to dispute the claim — which can take weeks.</div>`
+  },
+  ai_music: {
+    icon:'🤖', title:'AI Music Policy (October 2025)',
+    body:`<p>On October 28, 2025, ASCAP, BMI, and SOCAN (Canada) released a joint policy statement on AI-generated music and PRO royalty eligibility.</p>
+    <div class="modal-law-box">📜 <strong>The Joint Policy:</strong><br><br>• <strong>Partially AI-generated music:</strong> ELIGIBLE for PRO registration and royalties — as long as there is meaningful human creative contribution<br>• <strong>Fully AI-generated music:</strong> NOT ELIGIBLE for PRO royalties — no human authorship = no copyright protection<br><br>This aligns with the US Copyright Office's position that copyright requires human authorship.</div>
+    <p>This means: if you use AI tools (Suno, Udio, etc.) to help write or produce, but YOU are the creative force, your music can still be registered. But if you just type a prompt and call it your song — you can't register it, and you can't collect PRO royalties.</p>
+    <div class="modal-law-box">⚠️ <strong>Game Impact:</strong> Any track labeled "AI-Generated" in World Stage cannot be registered with ASCAP, BMI, or any PRO. It also cannot receive mechanical royalties via The MLC.</div>`
+  }
+};
+
+function showLesson(key) {
+  const lesson = LESSONS[key];
+  if (!lesson) return;
+  let xpLine = '';
+  if (!G.completedLessons.includes(key)) {
+    G.completedLessons.push(key);
+    addXP(30);
+    xpLine = '<div class="modal-rewards">+30 XP earned for completing this lesson</div>';
+  }
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-icon">${lesson.icon}</div>
+    <div class="modal-title">${lesson.title}</div>
+    <div class="modal-body">${lesson.body}</div>
+    ${xpLine}
+    <button class="modal-btn" onclick="closeModal()">GOT IT</button>
+  `;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+// ═══════════════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════════════
+function showModal(type, data) {
+  let html = '';
+  if (type === 'action') {
+    const rewards = [];
+    if (data.money > 0)   rewards.push(`+$${data.money.toLocaleString()}`);
+    if (data.streams > 0) rewards.push(`+${fmtNum(data.streams)} streams`);
+    if (data.follow > 0)  rewards.push(`+${fmtNum(data.follow)} followers`);
+    html = `
+      <div class="modal-icon">✅</div>
+      <div class="modal-title">${data.title}</div>
+      <div class="modal-rewards">${rewards.join(' · ')}</div>
+      <div class="modal-law-box">📖 <strong>Industry Law:</strong><br>${data.law}</div>
+      <button class="modal-btn" onclick="closeModal()">KEEP GRINDING</button>`;
+  }
+  else if (type === 'brand') {
+    const b = data.brand;
+    html = `
+      <div class="modal-icon">🔥</div>
+      <div class="modal-title">${b.name} UNLOCKED</div>
+      <div class="modal-body">${b.desc}</div>
+      <div class="modal-rewards">+${b.drip} Drip Score · +${b.cred} Street Cred · +40 XP</div>
+      <div class="modal-law-box">📖 <strong>About this brand:</strong><br>Founded: ${b.founder}<br>Tier: ${b.tier.replace('_',' ').toUpperCase()}<br>${b.name === 'Dapper Dan' ? 'Daniel Day launched his Harlem atelier in 1982 and dressed LL Cool J, Mike Tyson, Jay-Z, and Cardi B. Gucci partnered with him in 2017 after years of legal battles.' : b.name === 'KITH' ? 'Ronnie Fieg grew up in Queens and built KITH into a global lifestyle brand. The Treats cereal bar inside every flagship became a cultural destination.' : 'One of NYC\'s most culturally significant fashion labels.'}</div>
+      <button class="modal-btn" onclick="closeModal()">DRIP ACTIVATED</button>`;
+  }
+  else if (type === 'pro') {
+    const messages = {
+      ascap: 'ASCAP is the oldest US PRO — founded in 1914. As a non-profit, all revenue (minus admin costs) goes back to members. Consent Decree with the DOJ means rates are set by the courts.',
+      bmi: 'BMI went for-profit in 2022 — a major industry shift. With 1.4M+ members and 22.4M works, it\'s the largest US PRO by catalog. Free to join as a writer.',
+      sesac: 'SESAC is invite-only and privately owned. Smaller but known for more accurate, data-driven royalty calculations. Bob Dylan, Adele, and Neil Diamond are SESAC members.',
+      sgacedom: 'SGACEDOM is your gateway to Dominican Republic royalties under Ley 65-00. They handle both performance AND mechanical rights — and have reciprocal agreements via CISAC/LATINAUTOR for international collections.',
+      sayce: 'SAYCE registration gives you access to Ecuador\'s entire three-society royalty system. Every public performance in Ecuador requires SAYCE authorization — mandatory by law under Código Ingenios 2016.',
+      mlc: 'The MLC was created by the Music Modernization Act of 2018 to fix the billions in unclaimed streaming mechanical royalties. Every US streamer (Spotify, Apple, Amazon) pays into The MLC.'
+    };
+    html = `
+      <div class="modal-icon">📋</div>
+      <div class="modal-title">REGISTERED WITH ${data.name}!</div>
+      <div class="modal-law-box">📖 <strong>What this means:</strong><br>${messages[data.id] || 'You\'re now registered and eligible for royalty collection in this territory.'}</div>
+      <div class="modal-rewards">+$300 first royalty payment · +80 XP</div>
+      <button class="modal-btn" onclick="closeModal()">COLLECT MY ROYALTIES</button>`;
+  }
+  else if (type === 'venue') {
+    html = `
+      <div class="modal-icon">🎪</div>
+      <div class="modal-title">SHOW BOOKED: ${data.name.toUpperCase()}</div>
+      <div class="modal-rewards">+$${data.fee.toLocaleString()} performance fee · +${fmtNum(data.follow)} new followers · +60 XP</div>
+      <div class="modal-law-box">📖 <strong>Performance Rights:</strong><br>Every live performance triggers performance royalties — the venue must have a blanket license from ASCAP, BMI, or SESAC to legally play music. As the performing artist, you're covered by your PRO registration. If you perform in the Dominican Republic, the venue needs a SGACEDOM license. In Ecuador, SAYCE authorization is mandatory for ANY public event.</div>
+      <button class="modal-btn" onclick="closeModal()">TAKE THE STAGE</button>`;
+  }
+  else if (type === 'levelUp') {
+    html = `
+      <div class="modal-icon">⬆️</div>
+      <div class="modal-title">LEVEL UP! YOU'RE NOW LEVEL ${data.level}</div>
+      <div class="modal-body" style="text-align:center">New venues, regions, and deals are unlocking. Keep building your career.</div>
+      ${data.level >= 3 ? '<div class="modal-rewards">🌍 Dominican Republic & Ecuador now accessible!</div>' : ''}
+      ${data.level >= 4 ? '<div class="modal-rewards">🎸 Nashville now accessible!</div>' : ''}
+      ${data.level >= 5 ? '<div class="modal-rewards">🇪🇨 Guayaquil now accessible!</div>' : ''}
+      <button class="modal-btn" onclick="closeModal()">LET\'S GO</button>`;
+  }
+  document.getElementById('modalContent').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modalOverlay')) return;
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+// ═══════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════
+function toast(msg, type='') {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+</script>
+</body>
+</html>
