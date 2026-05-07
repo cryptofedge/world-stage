@@ -1,8 +1,8 @@
-﻿# ≡ƒÄ╡ World Stage ΓÇö A Music Industry RPG
+﻿# ≡ƒÄ╡ World Stage - A Music Industry RPG
 
 > *From a Lagos open mic to the Tokyo Dome. Your journey starts with one track.*
 
-**World Stage** is a mobile RPG set inside the global music industry. You play as an emerging artist navigating the unique scenes, politics, and sounds of music cities around the world ΓÇö building reputation, signing deals, recording tracks, and forging relationships that shape your career.
+**World Stage** is a mobile RPG set inside the global music industry. You play as an emerging artist navigating the unique scenes, politics, and sounds of music cities around the world - building reputation, signing deals, recording tracks, and forging relationships that shape your career.
 
 ---
 
@@ -26,23 +26,23 @@ Eight playable regions (more coming), each with distinct genres, cultures, venue
 ## ≡ƒÄ« Core Gameplay Loop
 
 ```
-Travel ΓåÆ Meet NPCs ΓåÆ Accept Quests ΓåÆ Record Tracks ΓåÆ Perform ΓåÆ Build Rep ΓåÆ Unlock New Regions
+Travel → Meet NPCs → Accept Quests → Record Tracks → Perform → Build Rep → Unlock New Regions
 ```
 
 ### Artist Stats
 Your five stats grow as you play and make decisions:
 
-- **Talent** ΓÇö Raw musical ability. Affects track quality.
-- **Charisma** ΓÇö Stage presence and networking. Affects performance outcomes and NPC relationships.
-- **Business** ΓÇö Deal-making instincts. Affects contract negotiation.
-- **Production** ΓÇö Studio craft. Affects track quality and beat selection.
-- **Global Reach** ΓÇö Cross-cultural appeal. Unlocks new regions and boosts international streams.
+- **Talent** - Raw musical ability. Affects track quality.
+- **Charisma** - Stage presence and networking. Affects performance outcomes and NPC relationships.
+- **Business** - Deal-making instincts. Affects contract negotiation.
+- **Production** - Studio craft. Affects track quality and beat selection.
+- **Global Reach** - Cross-cultural appeal. Unlocks new regions and boosts international streams.
 
 ### Reputation
-Every region tracks your reputation separately (0ΓÇô100). Higher rep means access to better venues, bigger events, and more powerful NPCs willing to work with you.
+Every region tracks your reputation separately (0-100). Higher rep means access to better venues, bigger events, and more powerful NPCs willing to work with you.
 
 ### Relationships
-Every NPC has an affinity score. Choices in dialogue move it up or down. Hit certain thresholds and relationships evolve from *stranger* ΓåÆ *acquaintance* ΓåÆ *ally* ΓåÆ *collaborator* ΓåÆ *friend* (or *rival* if you burn bridges).
+Every NPC has an affinity score. Choices in dialogue move it up or down. Hit certain thresholds and relationships evolve from *stranger* → *acquaintance* → *ally* → *collaborator* → *friend* (or *rival* if you burn bridges).
 
 ### Recording
 Track quality is calculated from your stats, the beat you use, your equipment, and a random creativity factor. Quality determines streams, rep gained, and earnings.
@@ -90,28 +90,28 @@ world-stage/
 Γö£ΓöÇΓöÇ App.tsx                     # Entry point
 Γö£ΓöÇΓöÇ app.json                    # Expo config
 Γö£ΓöÇΓöÇ src/
-Γöé   Γö£ΓöÇΓöÇ types/
-Γöé   Γöé   ΓööΓöÇΓöÇ index.ts            # All TypeScript types & interfaces
-Γöé   Γö£ΓöÇΓöÇ data/
-Γöé   Γöé   Γö£ΓöÇΓöÇ regions.ts          # World regions data
-Γöé   Γöé   Γö£ΓöÇΓöÇ npcs.ts             # NPC roster with dialogues
-Γöé   Γöé   ΓööΓöÇΓöÇ quests.ts           # Quest definitions
-Γöé   Γö£ΓöÇΓöÇ store/
-Γöé   Γöé   Γö£ΓöÇΓöÇ index.ts            # Redux store
-Γöé   Γöé   Γö£ΓöÇΓöÇ playerSlice.ts      # Player state & actions
-Γöé   Γöé   ΓööΓöÇΓöÇ gameSlice.ts        # Game phase, quests, settings
-Γöé   Γö£ΓöÇΓöÇ screens/
-Γöé   Γöé   Γö£ΓöÇΓöÇ MainMenuScreen.tsx
-Γöé   Γöé   Γö£ΓöÇΓöÇ CharacterCreationScreen.tsx
-Γöé   Γöé   Γö£ΓöÇΓöÇ WorldMapScreen.tsx
-Γöé   Γöé   Γö£ΓöÇΓöÇ StudioScreen.tsx
-Γöé   Γöé   Γö£ΓöÇΓöÇ QuestsScreen.tsx
-Γöé   Γöé   Γö£ΓöÇΓöÇ ProfileScreen.tsx
-Γöé   Γöé   ΓööΓöÇΓöÇ RegionScreen.tsx
-Γöé   Γö£ΓöÇΓöÇ navigation/
-Γöé   Γöé   ΓööΓöÇΓöÇ index.tsx           # Stack + Tab navigators
-Γöé   ΓööΓöÇΓöÇ utils/
-Γöé       ΓööΓöÇΓöÇ gameEngine.ts       # Core game logic (quality, streams, performance)
+│   Γö£ΓöÇΓöÇ types/
+│   │   ΓööΓöÇΓöÇ index.ts            # All TypeScript types & interfaces
+│   Γö£ΓöÇΓöÇ data/
+│   │   Γö£ΓöÇΓöÇ regions.ts          # World regions data
+│   │   Γö£ΓöÇΓöÇ npcs.ts             # NPC roster with dialogues
+│   │   ΓööΓöÇΓöÇ quests.ts           # Quest definitions
+│   Γö£ΓöÇΓöÇ store/
+│   │   Γö£ΓöÇΓöÇ index.ts            # Redux store
+│   │   Γö£ΓöÇΓöÇ playerSlice.ts      # Player state & actions
+│   │   ΓööΓöÇΓöÇ gameSlice.ts        # Game phase, quests, settings
+│   Γö£ΓöÇΓöÇ screens/
+│   │   Γö£ΓöÇΓöÇ MainMenuScreen.tsx
+│   │   Γö£ΓöÇΓöÇ CharacterCreationScreen.tsx
+│   │   Γö£ΓöÇΓöÇ WorldMapScreen.tsx
+│   │   Γö£ΓöÇΓöÇ StudioScreen.tsx
+│   │   Γö£ΓöÇΓöÇ QuestsScreen.tsx
+│   │   Γö£ΓöÇΓöÇ ProfileScreen.tsx
+│   │   ΓööΓöÇΓöÇ RegionScreen.tsx
+│   Γö£ΓöÇΓöÇ navigation/
+│   │   ΓööΓöÇΓöÇ index.tsx           # Stack + Tab navigators
+│   ΓööΓöÇΓöÇ utils/
+│       ΓööΓöÇΓöÇ gameEngine.ts       # Core game logic (quality, streams, performance)
 ΓööΓöÇΓöÇ assets/
     Γö£ΓöÇΓöÇ images/
     ΓööΓöÇΓöÇ sounds/
@@ -121,29 +121,29 @@ world-stage/
 
 ## ≡ƒù║ Roadmap
 
-### v0.2 ΓÇö NPC Economy
+### v0.2 - NPC Economy
 - [ ] Full NPC dialogue trees with branching
 - [ ] Collaboration feature (co-write / feature tracks)
 - [ ] Label contract negotiation mini-game
 
-### v0.3 ΓÇö Live Performance
+### v0.3 - Live Performance
 - [ ] Performance mini-game (rhythm / crowd reaction)
 - [ ] Festival booking system
 - [ ] Award show events with narrative outcomes
 
-### v0.4 ΓÇö Business Layer
+### v0.4 - Business Layer
 - [ ] Record label deal flow
 - [ ] Publishing royalties and sync licensing
 - [ ] Manager/agent NPC tier
 - [ ] Rival artist system
 
-### v0.5 ΓÇö Audio & Polish
+### v0.5 - Audio & Polish
 - [ ] Regional ambient soundscapes
 - [ ] Beat preview system (original audio)
 - [ ] Animated region transitions
 - [ ] Save/load system (AsyncStorage)
 
-### v1.0 ΓÇö Launch
+### v1.0 - Launch
 - [ ] Full narrative arcs for all 8 regions
 - [ ] Multiplayer charts (global leaderboard by region)
 - [ ] App Store / Google Play release
@@ -164,7 +164,7 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 ## ≡ƒôä License
 
-MIT ┬⌐ Fellito Rodriguez
+MIT © Fellito Rodriguez
 ---
 
 ## License & Brand
@@ -173,7 +173,7 @@ MIT ┬⌐ Fellito Rodriguez
 
 ### FEDGE 2.O | Powered by Rafael Fellito Rodriguez and Eclat Universe
 
-**┬⌐ 2026 FEDGE 2.O. All rights reserved.**
+**© 2026 FEDGE 2.O. All rights reserved.**
 
 This project is part of the FEDGE 2.O ecosystem and is protected under full intellectual property rights reserved by Rafael Fellito Rodriguez and Eclat Universe.
 
@@ -186,11 +186,11 @@ This project is part of the FEDGE 2.O ecosystem and is protected under full inte
 
 ### Key Rights
 
-Γ£ô **All intellectual property retained**
-Γ£ô **Reproduction prohibited without permission**
-Γ£ô **Distribution rights reserved**
-Γ£ô **Derivative works not permitted**
-Γ£ô **Commercial use requires authorization**
+✓ **All intellectual property retained**
+✓ **Reproduction prohibited without permission**
+✓ **Distribution rights reserved**
+✓ **Derivative works not permitted**
+✓ **Commercial use requires authorization**
 
 ### Attribution
 
@@ -207,3 +207,4 @@ Email: **cryptofedge@gmail.com**
 ---
 
 **Learn more:** [Full License](LICENSE)
+
