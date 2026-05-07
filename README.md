@@ -1,4 +1,4 @@
-﻿# ≡ƒÄ╡ World Stage - A Music Industry RPG
+﻿# 🎵 World Stage - A Music Industry RPG
 
 > *From a Lagos open mic to the Tokyo Dome. Your journey starts with one track.*
 
@@ -6,7 +6,7 @@
 
 ---
 
-## ≡ƒîì The World
+## 🌍 The World
 
 Eight playable regions (more coming), each with distinct genres, cultures, venues, NPCs, and narrative arcs:
 
@@ -23,7 +23,7 @@ Eight playable regions (more coming), each with distinct genres, cultures, venue
 
 ---
 
-## ≡ƒÄ« Core Gameplay Loop
+## 🎮 Core Gameplay Loop
 
 ```
 Travel → Meet NPCs → Accept Quests → Record Tracks → Perform → Build Rep → Unlock New Regions
@@ -62,7 +62,7 @@ Track quality is calculated from your stats, the beat you use, your equipment, a
 
 ---
 
-## ≡ƒÜÇ Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 - Node.js 18+
@@ -83,43 +83,43 @@ Scan the QR code with **Expo Go** (iOS/Android) or press `i` for iOS Simulator /
 
 ---
 
-## ≡ƒôü Project Structure
+## 📜 Project Structure
 
 ```
 world-stage/
-Γö£ΓöÇΓöÇ App.tsx                     # Entry point
-Γö£ΓöÇΓöÇ app.json                    # Expo config
-Γö£ΓöÇΓöÇ src/
-│   Γö£ΓöÇΓöÇ types/
-│   │   ΓööΓöÇΓöÇ index.ts            # All TypeScript types & interfaces
-│   Γö£ΓöÇΓöÇ data/
-│   │   Γö£ΓöÇΓöÇ regions.ts          # World regions data
-│   │   Γö£ΓöÇΓöÇ npcs.ts             # NPC roster with dialogues
-│   │   ΓööΓöÇΓöÇ quests.ts           # Quest definitions
-│   Γö£ΓöÇΓöÇ store/
-│   │   Γö£ΓöÇΓöÇ index.ts            # Redux store
-│   │   Γö£ΓöÇΓöÇ playerSlice.ts      # Player state & actions
-│   │   ΓööΓöÇΓöÇ gameSlice.ts        # Game phase, quests, settings
-│   Γö£ΓöÇΓöÇ screens/
-│   │   Γö£ΓöÇΓöÇ MainMenuScreen.tsx
-│   │   Γö£ΓöÇΓöÇ CharacterCreationScreen.tsx
-│   │   Γö£ΓöÇΓöÇ WorldMapScreen.tsx
-│   │   Γö£ΓöÇΓöÇ StudioScreen.tsx
-│   │   Γö£ΓöÇΓöÇ QuestsScreen.tsx
-│   │   Γö£ΓöÇΓöÇ ProfileScreen.tsx
-│   │   ΓööΓöÇΓöÇ RegionScreen.tsx
-│   Γö£ΓöÇΓöÇ navigation/
-│   │   ΓööΓöÇΓöÇ index.tsx           # Stack + Tab navigators
-│   ΓööΓöÇΓöÇ utils/
-│       ΓööΓöÇΓöÇ gameEngine.ts       # Core game logic (quality, streams, performance)
-ΓööΓöÇΓöÇ assets/
-    Γö£ΓöÇΓöÇ images/
-    ΓööΓöÇΓöÇ sounds/
+├── App.tsx                     # Entry point
+├── app.json                    # Expo config
+├── src/
+│   ├── types/
+│   │   └── index.ts            # All TypeScript types & interfaces
+│   ├── data/
+│   │   ├── regions.ts          # World regions data
+│   │   ├── npcs.ts             # NPC roster with dialogues
+│   │   └── quests.ts           # Quest definitions
+│   ├── store/
+│   │   ├── index.ts            # Redux store
+│   │   ├── playerSlice.ts      # Player state & actions
+│   │   └── gameSlice.ts        # Game phase, quests, settings
+│   ├── screens/
+│   │   ├── MainMenuScreen.tsx
+│   │   ├── CharacterCreationScreen.tsx
+│   │   ├── WorldMapScreen.tsx
+│   │   ├── StudioScreen.tsx
+│   │   ├── QuestsScreen.tsx
+│   │   ├── ProfileScreen.tsx
+│   │   └── RegionScreen.tsx
+│   ├── navigation/
+│   │   └── index.tsx           # Stack + Tab navigators
+│   └── utils/
+│       └── gameEngine.ts       # Core game logic (quality, streams, performance)
+└── assets/
+    ├── images/
+    └── sounds/
 ```
 
 ---
 
-## ≡ƒù║ Roadmap
+## 🗺 Roadmap
 
 ### v0.2 - NPC Economy
 - [ ] Full NPC dialogue trees with branching
@@ -150,7 +150,7 @@ world-stage/
 
 ---
 
-## ≡ƒñ¥ Contributing
+## 🤝 Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you'd like to change.
 
@@ -162,7 +162,7 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 ---
 
-## ≡ƒôä License
+## 📄 License
 
 MIT © Fellito Rodriguez
 ---
@@ -207,5 +207,6 @@ Email: **cryptofedge@gmail.com**
 ---
 
 **Learn more:** [Full License](LICENSE)
+
 
 
