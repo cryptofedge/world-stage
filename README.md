@@ -12,14 +12,14 @@ Eight playable regions (more coming), each with distinct genres, cultures, venue
 
 | Region | Country | Genres | Unlock |
 |---|---|---|---|
-| ≡ƒç│≡ƒç¼ Lagos | Nigeria | Afrobeats, Highlife, Afro-House | Starter |
-| ≡ƒç¼≡ƒçº London | UK | Grime, Drill, Electronic | Level 4 |
-| ≡ƒç║≡ƒç╕ Atlanta | USA | Hip-Hop, R&B, Trap | Level 6 |
-| ≡ƒçº≡ƒç╖ S├úo Paulo | Brazil | Baile Funk, Samba, Latin Pop | Level 5 |
-| ≡ƒç░≡ƒç╖ Seoul | South Korea | K-Pop, Hip-Hop, R&B | Level 5 |
-| ≡ƒç║≡ƒç╕ Nashville | USA | Country, Rock, Pop | Level 7 |
-| ≡ƒç┐≡ƒçª Johannesburg | South Africa | Amapiano, Afro-House | Level 6 |
-| ≡ƒç»≡ƒç╡ Tokyo | Japan | J-Pop, Electronic | Level 12 (Seoul deal required) |
+| 🇳🇬 Lagos | Nigeria | Afrobeats, Highlife, Afro-House | Starter |
+| 🇬🇧 London | UK | Grime, Drill, Electronic | Level 4 |
+| 🇺🇸 Atlanta | USA | Hip-Hop, R&B, Trap | Level 6 |
+| 🇧🇷 São Paulo | Brazil | Baile Funk, Samba, Latin Pop | Level 5 |
+| 🇰🇷 Seoul | South Korea | K-Pop, Hip-Hop, R&B | Level 5 |
+| 🇺🇸 Nashville | USA | Country, Rock, Pop | Level 7 |
+| 🇿🇦 Johannesburg | South Africa | Amapiano, Afro-House | Level 6 |
+| 🇯🇵 Tokyo | Japan | J-Pop, Electronic | Level 12 (Seoul deal required) |
 
 ---
 
@@ -49,7 +49,7 @@ Track quality is calculated from your stats, the beat you use, your equipment, a
 
 ---
 
-## ≡ƒ¢á Tech Stack
+## 🛠 Tech Stack
 
 | Layer | Tech |
 |---|---|
@@ -152,7 +152,7 @@ world-stage/
 
 ## 🤝 Contributing
 
-Pull requests are welcome. For major changes, please open an issue first to discuss what you'd like to change.
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
 1. Fork the repo
 2. Create a feature branch (`git checkout -b feature/new-region-mumbai`)
@@ -160,11 +160,6 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 4. Push to the branch (`git push origin feature/new-region-mumbai`)
 5. Open a Pull Request
 
----
-
-## 📄 License
-
-MIT © Fellito Rodriguez
 ---
 
 ## License & Brand
@@ -207,9 +202,3 @@ Email: **cryptofedge@gmail.com**
 ---
 
 **Learn more:** [Full License](LICENSE)
-
-
-
-
-
-
