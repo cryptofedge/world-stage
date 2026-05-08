@@ -1,4 +1,4 @@
-﻿# 🎵 World Stage - A Music Industry RPG
+﻿﻿# 🎵 World Stage - A Music Industry RPG
 
 > *From a Lagos open mic to the Tokyo Dome. Your journey starts with one track.*
 
