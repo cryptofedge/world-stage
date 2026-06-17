@@ -2060,4 +2060,25 @@ function showModal(type, data) {
       bmi: 'BMI went for-profit in 2022 — a major industry shift. With 1.4M+ members and 22.4M works, it\'s the largest US PRO by catalog. Free to join as a writer.',
       sesac: 'SESAC is invite-only and privately owned. Smaller but known for more accurate, data-driven royalty calculations. Bob Dylan, Adele, and Neil Diamond are SESAC members.',
       sgacedom: 'SGACEDOM is your gateway to Dominican Republic royalties under Ley 65-00. They handle both performance AND mechanical rights — and have reciprocal agreements via CISAC/LATINAUTOR for international collections.',
+      sayce: 'SAYCE registration gives you access to Ecuador\'s entire three-society licensing system (SAYCE + SARIME + SOPROFON). Every public performance in Ecuador requires SAYCE authorization — even a single live show. Minimum rate: $4.56 for 1–10 works.',
+      mlc: 'The MLC (Mechanical Licensing Collective) was created by the Music Modernization Act of 2018. It collects and distributes mechanical royalties from streaming services to songwriters and publishers. Free to register at themlc.com.'
+    };
+    const msg = messages[data.id] || `You are now registered with ${data.name}.`;
+    html = `
+      <div class="modal-icon">✅</div>
+      <div class="modal-title">${data.name} REGISTERED</div>
+      <div class="modal-body"><p>${msg}</p></div>
+      <div class="modal-rewards">+$300 · +80 XP</div>
+      <button class="modal-btn" onclick="closeModal()">LET\'S GET PAID</button>`;
+  }
+  document.getElementById('modalContent').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+</script>
+</body>
+</html>
       sayce: 'SAYCE registration gives you access to Ecuador\'s entire
