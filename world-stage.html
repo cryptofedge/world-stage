@@ -1533,7 +1533,7 @@
 <!-- ═══════════════════════════════════════════════
      MODAL
 ═══════════════════════════════════════════════ -->
-<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
   <div class="modal-box" id="modalBox">
     <button class="modal-close" onclick="closeModal()">✕</button>
     <div id="modalContent"></div>
