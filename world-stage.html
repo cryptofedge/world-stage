@@ -1817,9 +1817,46 @@ const ACTIONS = {
   manager:    { cost:200, streams:0,    follow:500,  money:600,  xp:70,  cred:2,  title:'Manager Hired!', law:'A standard manager deal is 15–20% of gross income (360 deal) or net income (traditional deal). The key clause is the "sunset clause" — does the manager get their % on deals THEY brought AFTER you fire them? Industry standard is 3–5 years sunset on active deals.' }
 };
 
+function buildSunoPrompt() {
+  const genreVibes = {
+    'HIP-HOP/RAP': 'hip hop rap, hard hitting 808s, trap hi-hats, melodic flow',
+    'R&B/SOUL': 'r&b soul, smooth production, emotional vocals, soulful melodies',
+    'AFROBEATS': 'afrobeats, dancehall percussion, vibrant rhythm, infectious groove',
+    'REGGAETON': 'reggaeton, dembow rhythm, latin urban, perreo beat',
+    'POP': 'pop, catchy hook, radio ready, polished production',
+    'ELECTRONIC': 'electronic, synth driven, energetic drop, club banger',
+    'LATIN': 'latin pop, guitar melody, passionate vocals, upbeat rhythm',
+    'DANCEHALL': 'dancehall, riddim, caribbean vibes, party anthem'
+  };
+  const cityVibes = {
+    'Atlanta, GA': 'Atlanta trap, Southern rap energy',
+    'New York City': 'NYC drill, boom bap roots, street energy',
+    'Los Angeles': 'West Coast G-funk, LA smooth, laid back',
+    'Miami': 'Miami bass, club ready, Latin influence',
+    'Chicago': 'Chicago drill, dark melodic, grimey',
+    'Houston': 'Houston chopped and screwed, syrupy flow',
+    'Santo Domingo': 'Dominican urban, Latin street, Caribbean fire',
+    'London': 'UK drill, grime roots, dark London energy',
+    'Lagos': 'Afrobeats Lagos, highlife fusion, West African groove',
+    'Kingston': 'Reggae roots, Kingston yard, conscious vibes',
+    'Toronto': 'Toronto sound, 6ix vibes, melodic rap',
+    'Seoul': 'K-pop fusion, Seoul style, polished and punchy'
+  };
+  const genre = genreVibes[G.genre] || 'urban music, modern production';
+  const city = cityVibes[G.city] || 'street vibes, authentic sound';
+  return `${genre}, ${city}, ${G.name} artist, professional quality, 2 minute song`;
+}
+
 function doAction(key) {
   const a = ACTIONS[key];
   if (G.money < a.cost) { toast(`Need $${a.cost} for this!`, 'error'); return; }
+  if (key === 'record') {
+    const prompt = buildSunoPrompt();
+    const sunoUrl = `https://suno.com/create?prompt=${encodeURIComponent(prompt)}`;
+    window.open(sunoUrl, '_blank');
+    showModal('record', { a });
+    return;
+  }
   G.money    -= a.cost;
   G.streams  += a.streams;
   G.following+= a.follow;
@@ -1828,6 +1865,17 @@ function doAction(key) {
   G.dripScore = Math.min(100, G.dripScore + (a.drip||0));
   addXP(a.xp);
   showModal('action', { title: a.title, law: a.law, money: a.money, streams: a.streams, follow: a.follow });
+}
+
+function collectTrack() {
+  const a = ACTIONS['record'];
+  G.streams  += a.streams;
+  G.following+= a.follow;
+  G.money    += a.money;
+  G.streetCred+= a.cred || 0;
+  addXP(a.xp);
+  closeModal();
+  toast('🎵 Track collected! Rewards applied.', 'success');
 }
 
 // ═══════════════════════════════════════════════
@@ -2080,7 +2128,21 @@ let pendingLevelUp = null;
 
 function showModal(type, data) {
   let html = '';
-  if (type === 'action') {
+  if (type === 'record') {
+    const a = data.a;
+    const prompt = buildSunoPrompt();
+    html = `
+      <div class="modal-icon">🎙️</div>
+      <div class="modal-title">SUNO STUDIO OPEN</div>
+      <div class="modal-body">
+        <p>Suno just opened in a new tab with your prompt:</p>
+        <div class="modal-law-box" style="font-family:monospace;font-size:12px;word-break:break-word;">"${prompt}"</div>
+        <p style="margin-top:12px;">Generate your track on Suno, then come back and hit the button below to collect your rewards.</p>
+      </div>
+      <div class="modal-rewards">+$${a.money.toLocaleString()} · +${fmtNum(a.streams)} streams · +${fmtNum(a.follow)} followers · +${a.xp} XP</div>
+      <button class="modal-btn" onclick="collectTrack()">🎵 I MADE MY TRACK</button>`;
+  }
+  else if (type === 'action') {
     const rewards = [];
     if (data.money > 0)   rewards.push(`+$${data.money.toLocaleString()}`);
     if (data.streams > 0) rewards.push(`+${fmtNum(data.streams)} streams`);
