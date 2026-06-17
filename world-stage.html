@@ -1195,6 +1195,7 @@
       <div class="player-name" id="sidebarName">ARTIST</div>
       <div class="player-genre" id="sidebarGenre">Hip-Hop</div>
       <div class="level-badge" id="sidebarLevel">LEVEL 1</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:4px;text-align:center;" id="xpLabel">0 / 200 XP</div>
     </div>
     <div class="stats-panel">
       <div class="stat-row">
@@ -1595,8 +1596,52 @@ let G = {
 
 let selectedGenre = '';
 
+// Auto-resume saved game on load
+(function() {
+  try {
+    const saved = localStorage.getItem('worldStageG');
+    if (saved) {
+      const s = JSON.parse(saved);
+      if (s.name) {
+        Object.assign(G, s);
+        // Skip splash + char create, go straight to hub
+        document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+        document.getElementById('hub').classList.add('active');
+        // initHub after DOM is ready
+        setTimeout(() => { initHub(); }, 0);
+      }
+    }
+  } catch(e) {}
+})();
+
 // ═══════════════════════════════════════════════
 // SCREENS
+// ═══════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════
+function toast(msg, type = 'success') {
+  const container = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  container.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+// ═══════════════════════════════════════════════
+// SAVE / LOAD
+// ═══════════════════════════════════════════════
+function saveGame() {
+  try { localStorage.setItem('worldStageG', JSON.stringify(G)); } catch(e) {}
+}
+
+function loadGame() {
+  try {
+    const saved = localStorage.getItem('worldStageG');
+    if (saved) Object.assign(G, JSON.parse(saved));
+  } catch(e) {}
+}
+
 // ═══════════════════════════════════════════════
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -1714,9 +1759,11 @@ function updateStats() {
   document.getElementById('barDrip').style.width = G.dripScore + '%';
   document.getElementById('barCred').style.width = Math.min(100, (G.streetCred / 100) * 100) + '%';
   document.getElementById('xpBar').style.width = ((G.xp / G.xpMax) * 100) + '%';
+  document.getElementById('xpLabel').textContent = G.xp + ' / ' + G.xpMax + ' XP';
   document.getElementById('dripScoreBig').textContent = G.dripScore;
   document.getElementById('dripBarFill').style.width = G.dripScore + '%';
   document.getElementById('dripTierLabel').textContent = getDripTier(G.dripScore);
+  saveGame();
 }
 
 function fmtNum(n) {
@@ -1747,11 +1794,12 @@ function addXP(amount) {
 // ═══════════════════════════════════════════════
 // PANELS
 // ═══════════════════════════════════════════════
-function showPanel(id) {
+function showPanel(id, el) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
   document.getElementById('panel-' + id).classList.add('active');
-  event.currentTarget.classList.add('active');
+  const nav = el || (typeof event !== 'undefined' && event.currentTarget) || document.querySelector(`.nav-link[onclick*="'${id}'"]`);
+  if (nav) nav.classList.add('active');
 }
 
 // ═══════════════════════════════════════════════
@@ -1795,11 +1843,6 @@ function travelTo(region) {
   updateRegionUI();
   buildVenueList();
   showPanel('career');
-  // Close map, reopen career
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-  document.getElementById('panel-career').classList.add('active');
-  document.querySelector('.nav-link').classList.add('active');
   toast(`✈️ Arrived in ${r.flag} ${r.name}!`);
 }
 
@@ -2070,6 +2113,22 @@ function showModal(type, data) {
       <div class="modal-body"><p>${msg}</p></div>
       <div class="modal-rewards">+$300 · +80 XP</div>
       <button class="modal-btn" onclick="closeModal()">LET\'S GET PAID</button>`;
+  }
+  else if (type === 'venue') {
+    html = `
+      <div class="modal-icon">🎤</div>
+      <div class="modal-title">SHOW BOOKED: ${data.name.toUpperCase()}</div>
+      <div class="modal-rewards">+$${data.fee.toLocaleString()} · +${data.follow.toLocaleString()} followers</div>
+      <div class="modal-law-box">📖 <strong>Performance Rights:</strong><br>Every live performance triggers performance royalties. If you\'re registered with a PRO (ASCAP, BMI, SESAC), the venue must pay a blanket license fee and your PRO collects your share. No PRO = no performance royalties.</div>
+      <button class="modal-btn" onclick="closeModal()">TAKE THE STAGE</button>`;
+  }
+  else if (type === 'levelUp') {
+    html = `
+      <div class="modal-icon">⭐</div>
+      <div class="modal-title">LEVEL ${data.level} UNLOCKED!</div>
+      <div class="modal-body"><p>You\'re leveling up. New venues, new regions, and new deals are opening up. Keep grinding.</p></div>
+      <div class="modal-rewards">LEVEL ${data.level} REACHED</div>
+      <button class="modal-btn" onclick="closeModal()">LET\'S GO</button>`;
   }
   document.getElementById('modalContent').innerHTML = html;
   document.getElementById('modalOverlay').classList.add('open');
