@@ -1782,13 +1782,16 @@ function getDripTier(score) {
 
 function addXP(amount) {
   G.xp += amount;
+  let leveled = false;
   if (G.xp >= G.xpMax) {
     G.level++;
     G.xp = G.xp - G.xpMax;
     G.xpMax = Math.floor(G.xpMax * 1.4);
-    showModal('levelUp', { level: G.level });
+    leveled = true;
+    pendingLevelUp = G.level;
   }
   updateStats();
+  return leveled;
 }
 
 // ═══════════════════════════════════════════════
@@ -2073,6 +2076,8 @@ function showLesson(key) {
 // ═══════════════════════════════════════════════
 // MODALS
 // ═══════════════════════════════════════════════
+let pendingLevelUp = null;
+
 function showModal(type, data) {
   let html = '';
   if (type === 'action') {
@@ -2136,6 +2141,11 @@ function showModal(type, data) {
 
 function closeModal() {
   document.getElementById('modalOverlay').classList.remove('open');
+  if (pendingLevelUp) {
+    const lvl = pendingLevelUp;
+    pendingLevelUp = null;
+    setTimeout(() => showModal('levelUp', { level: lvl }), 150);
+  }
 }
 </script>
 </body>
