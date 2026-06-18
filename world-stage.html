@@ -194,6 +194,53 @@
   }
   .stat-flash { animation: statFlash 0.5s ease both; }
 
+  /* ── PANEL HERO BANNERS ── */
+  .panel-hero {
+    width: 100%;
+    height: 200px;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .panel-hero img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 30%;
+    display: block;
+    transition: transform 8s ease-in-out;
+  }
+  .panel-hero:hover img { transform: scale(1.04); }
+  .panel-hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 40%, rgba(10,10,15,0.85));
+    pointer-events: none;
+  }
+  .panel-hero-label {
+    position: absolute;
+    bottom: 14px;
+    left: 16px;
+    font-family: 'Bebas Neue', cursive;
+    font-size: 22px;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+    text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+    z-index: 1;
+  }
+
+  /* ── SPLASH FADE OUT ── */
+  #splash.splash-exit {
+    animation: splashExit 0.7s ease forwards;
+  }
+  @keyframes splashExit {
+    from { opacity: 1; transform: scale(1); }
+    to   { opacity: 0; transform: scale(1.04); }
+  }
+
   /* ── CONFETTI CANVAS ── */
   #confettiCanvas {
     position: fixed;
@@ -1441,6 +1488,10 @@
     <div class="panel" id="panel-map">
       <div class="panel-title">WORLD MAP</div>
       <div class="panel-sub">3 regions available now. 6 coming soon. Build your global reach.</div>
+      <div class="panel-hero">
+        <img src="assets/images/05_world_map.png" alt="World Map">
+        <div class="panel-hero-label">🌍 SELECT YOUR NEXT CITY</div>
+      </div>
       <div class="map-container">
         <div class="map-title">SELECT A REGION TO TRAVEL</div>
         <div class="regions-list">
@@ -1518,6 +1569,10 @@
     <div class="panel" id="panel-fashion">
       <div class="panel-title">NYC FASHION & SWAG</div>
       <div class="panel-sub">Your look is your brand. Build your Drip Score to unlock better deals, higher booking fees, and label attention.</div>
+      <div class="panel-hero">
+        <img src="assets/images/08_drip_shop.png" alt="Drip Shop">
+        <div class="panel-hero-label">👑 DRIP SCORE 100 — THE GOAL</div>
+      </div>
       <div class="drip-meter">
         <div class="drip-header">
           <div>
@@ -1614,6 +1669,10 @@
     <div class="panel" id="panel-venues">
       <div class="panel-title" id="venuePanelTitle">ATLANTA VENUES</div>
       <div class="panel-sub">Book shows to earn performance income and build your local fanbase. Bigger venues = more money, but you need the stats to fill them.</div>
+      <div class="panel-hero">
+        <img src="assets/images/04_concert_venue.png" alt="Concert Venue">
+        <div class="panel-hero-label">🎤 FILL THE ARENA</div>
+      </div>
       <div class="venue-list" id="venueList"></div>
     </div>
 
@@ -1756,11 +1815,18 @@ let selectedGenre = '';
       const s = JSON.parse(saved);
       if (s.name) {
         Object.assign(G, s);
-        // Skip splash + char create, go straight to hub
-        document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-        document.getElementById('hub').classList.add('active');
-        // initHub after DOM is ready
-        setTimeout(() => { initHub(); }, 0);
+        // Show splash briefly, then transition to hub
+        const splashEl = document.getElementById('splash');
+        splashEl.classList.add('active');
+        setTimeout(() => {
+          splashEl.classList.add('splash-exit');
+          setTimeout(() => {
+            document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+            splashEl.classList.remove('splash-exit');
+            document.getElementById('hub').classList.add('active');
+            initHub();
+          }, 700);
+        }, 2000);
       }
     }
   } catch(e) {}
