@@ -1429,6 +1429,10 @@
     <div class="panel active" id="panel-career">
       <div class="panel-title" id="careerRegionTitle">ATLANTA, GA</div>
       <div class="panel-sub" id="careerRegionSub">Your journey begins here. Build your career, register your music, and level up.</div>
+      <div class="panel-hero">
+        <img src="assets/images/01_splash_screen.png" alt="World Stage" id="careerHeroImg">
+        <div class="panel-hero-label" id="careerHeroLabel">🎤 BUILD YOUR EMPIRE</div>
+      </div>
       <!-- Mentor Miles NPC -->
       <div class="mentor-card" onclick="showMentor()">
         <img class="mentor-avatar" src="assets/images/07_mentor_miles.jpg" alt="Mentor Miles">
@@ -1955,11 +1959,24 @@ function initHub() {
   toast(`Welcome to the game, ${G.name}! Start by recording a track.`);
 }
 
+const REGION_HERO = {
+  atlanta:      { img: 'assets/images/03_recording_studio.png', label: '🎙️ ATL — TRAP CAPITAL' },
+  nashville:    { img: 'assets/images/04_concert_venue.png',    label: '🎸 NASHVILLE — MUSIC CITY' },
+  santo_domingo:{ img: 'assets/images/01_splash_screen.png',    label: '🇩🇴 SANTO DOMINGO — LATIN FIRE' },
+  quito:        { img: 'assets/images/05_world_map.png',         label: '🇪🇨 QUITO — ANDEAN VIBES' },
+  guayaquil:    { img: 'assets/images/05_world_map.png',         label: '🇪🇨 GUAYAQUIL — COASTAL HEAT' }
+};
+
 function updateRegionUI() {
   const r = REGION_DATA[G.region] || REGION_DATA.atlanta;
   document.getElementById('careerRegionTitle').textContent = r.name.toUpperCase();
   document.getElementById('careerRegionSub').textContent = r.sub;
   document.getElementById('venuePanelTitle').textContent = r.name.toUpperCase() + ' VENUES';
+  const hero = REGION_HERO[G.region] || REGION_HERO.atlanta;
+  const img = document.getElementById('careerHeroImg');
+  const lbl = document.getElementById('careerHeroLabel');
+  if (img) { img.src = hero.img; img.style.opacity = '0'; setTimeout(() => img.style.opacity = '1', 50); img.style.transition = 'opacity 0.6s ease'; }
+  if (lbl) lbl.textContent = hero.label;
 }
 
 // ═══════════════════════════════════════════════
