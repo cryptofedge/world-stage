@@ -62,16 +62,24 @@
   #particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
 
   /* ── SPLASH ── */
-  #splash {
+  #splash { z-index: 10; overflow: hidden; }
+  .splash-bg {
+    position: absolute;
+    inset: -5%;
     background: url('assets/images/01_splash_screen.png') center/cover no-repeat;
-    z-index: 10;
+    animation: kenBurns 18s ease-in-out infinite alternate;
+    z-index: 0;
   }
   #splash::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: rgba(0,0,0,0.45);
+    background: rgba(0,0,0,0.5);
     z-index: 1;
+  }
+  @keyframes kenBurns {
+    from { transform: scale(1)    translateX(0)    translateY(0); }
+    to   { transform: scale(1.08) translateX(-2%)  translateY(-1%); }
   }
   .splash-logo {
     font-family: 'Bebas Neue', cursive;
@@ -80,7 +88,7 @@
     background: linear-gradient(135deg, #FFD700, #FFA500, #ff6b35);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    animation: logoGlow 2s ease-in-out infinite alternate;
+    animation: logoGlow 2s ease-in-out infinite alternate, splashFadeUp 1s ease 0.1s both;
     position: relative;
     z-index: 2;
     text-shadow: none;
@@ -95,6 +103,8 @@
     opacity: 0.8;
     margin-top: 8px;
     z-index: 2;
+    position: relative;
+    animation: splashFadeUp 1s ease 0.35s both;
   }
   .splash-tagline {
     font-size: 14px;
@@ -102,6 +112,8 @@
     margin-top: 24px;
     letter-spacing: 0.1em;
     z-index: 2;
+    position: relative;
+    animation: splashFadeUp 1s ease 0.55s both;
   }
   .btn-start {
     margin-top: 40px;
@@ -117,7 +129,7 @@
     transition: transform 0.15s, filter 0.15s;
     position: relative;
     z-index: 20;
-    animation: pulse 2s ease-in-out infinite;
+    animation: pulse 2s ease-in-out infinite, splashFadeUp 1s ease 0.8s both;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
     user-select: none;
@@ -127,6 +139,10 @@
   .btn-start:hover { transform: scale(1.05); filter: brightness(1.2); }
   .btn-start:active { transform: scale(0.97); animation: none; }
 
+  @keyframes splashFadeUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
   @keyframes logoGlow {
     from { filter: drop-shadow(0 0 20px rgba(255,165,0,0.3)); }
     to   { filter: drop-shadow(0 0 60px rgba(255,165,0,0.7)); }
@@ -134,6 +150,56 @@
   @keyframes pulse {
     0%,100% { box-shadow: 0 0 20px rgba(255,215,0,0.3); }
     50%      { box-shadow: 0 0 40px rgba(255,215,0,0.7); }
+  }
+
+  /* ── PANEL TRANSITIONS ── */
+  .panel { animation: none; }
+  .panel.panel-enter {
+    animation: panelSlideIn 0.35s cubic-bezier(0.22,1,0.36,1) both;
+  }
+  @keyframes panelSlideIn {
+    from { opacity: 0; transform: translateX(18px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  /* ── CARD STAGGER ── */
+  @keyframes cardSlideUp {
+    from { opacity: 0; transform: translateY(22px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0)    scale(1); }
+  }
+  .game-card.card-enter {
+    animation: cardSlideUp 0.4s cubic-bezier(0.22,1,0.36,1) both;
+  }
+
+  /* ── MODAL BG ZOOM ── */
+  @keyframes modalBgZoom {
+    from { background-size: 115%; }
+    to   { background-size: 105%; }
+  }
+  .modal-box.has-bg {
+    animation: modalIn 0.25s ease, modalBgZoom 10s ease-in-out infinite alternate;
+  }
+
+  /* ── MENTOR CARD PULSE ── */
+  @keyframes mentorGlow {
+    0%,100% { box-shadow: 0 0 0 0 rgba(255,215,0,0.0), 0 0 12px rgba(255,215,0,0.1); }
+    50%      { box-shadow: 0 0 0 4px rgba(255,215,0,0.12), 0 0 24px rgba(255,215,0,0.3); }
+  }
+  .mentor-card { animation: mentorGlow 3s ease-in-out infinite; }
+
+  /* ── STAT FLASH ── */
+  @keyframes statFlash {
+    0%   { color: var(--green); transform: scale(1.15); }
+    100% { color: inherit;      transform: scale(1); }
+  }
+  .stat-flash { animation: statFlash 0.5s ease both; }
+
+  /* ── CONFETTI CANVAS ── */
+  #confettiCanvas {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 200;
   }
 
   /* ── MUSIC NOTES ANIMATION ── */
@@ -1171,7 +1237,10 @@
 <!-- ═══════════════════════════════════════════════
      SCREEN 1: SPLASH
 ═══════════════════════════════════════════════ -->
+<canvas id="confettiCanvas"></canvas>
+
 <div class="screen active" id="splash">
+  <div class="splash-bg"></div>
   <div class="note" style="left:10%;top:70%;animation-delay:0s">♪</div>
   <div class="note" style="left:20%;top:80%;animation-delay:1s">♫</div>
   <div class="note" style="left:75%;top:75%;animation-delay:0.5s">♩</div>
@@ -1829,13 +1898,23 @@ function updateRegionUI() {
 // ═══════════════════════════════════════════════
 // STATS UPDATE
 // ═══════════════════════════════════════════════
+const _prev = {};
+function flashStat(el, val, fmt) {
+  const cur = fmt(val);
+  if (el.textContent !== cur) {
+    el.textContent = cur;
+    el.classList.remove('stat-flash');
+    void el.offsetWidth;
+    el.classList.add('stat-flash');
+  }
+}
 function updateStats() {
-  document.getElementById('statMoney').textContent = '$' + G.money.toLocaleString();
-  document.getElementById('statStreams').textContent = fmtNum(G.streams);
-  document.getElementById('statFollow').textContent = fmtNum(G.following);
-  document.getElementById('statDrip').textContent = G.dripScore;
-  document.getElementById('statCred').textContent = G.streetCred;
-  document.getElementById('sidebarMoney').textContent = '$' + G.money.toLocaleString();
+  flashStat(document.getElementById('statMoney'),   G.money,      v => '$' + v.toLocaleString());
+  flashStat(document.getElementById('statStreams'),  G.streams,    fmtNum);
+  flashStat(document.getElementById('statFollow'),   G.following,  fmtNum);
+  flashStat(document.getElementById('statDrip'),     G.dripScore,  v => v.toString());
+  flashStat(document.getElementById('statCred'),     G.streetCred, v => v.toString());
+  flashStat(document.getElementById('sidebarMoney'), G.money,      v => '$' + v.toLocaleString());
   document.getElementById('sidebarLevel').textContent = 'LEVEL ' + G.level;
   document.getElementById('barStreams').style.width = Math.min(100, (G.streams / 50000) * 100) + '%';
   document.getElementById('barFollow').style.width = Math.min(100, (G.following / 10000) * 100) + '%';
@@ -1847,6 +1926,44 @@ function updateStats() {
   document.getElementById('dripBarFill').style.width = G.dripScore + '%';
   document.getElementById('dripTierLabel').textContent = getDripTier(G.dripScore);
   saveGame();
+}
+
+// ── CONFETTI ENGINE ──
+function launchConfetti() {
+  const canvas = document.getElementById('confettiCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const colors = ['#FFD700','#FFA500','#ff6b35','#8844ff','#00ff88','#ffffff','#ff4466'];
+  const pieces = Array.from({length: 120}, () => ({
+    x: Math.random() * canvas.width,
+    y: -20 - Math.random() * 200,
+    w: 6 + Math.random() * 8,
+    h: 3 + Math.random() * 5,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    vx: (Math.random() - 0.5) * 4,
+    vy: 2 + Math.random() * 4,
+    rot: Math.random() * 360,
+    spin: (Math.random() - 0.5) * 8
+  }));
+  let frame = 0;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pieces.forEach(p => {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot * Math.PI / 180);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = Math.max(0, 1 - frame / 120);
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+      p.x += p.vx; p.y += p.vy; p.rot += p.spin; p.vy += 0.1;
+    });
+    frame++;
+    if (frame < 150) requestAnimationFrame(draw);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  draw();
 }
 
 function fmtNum(n) {
@@ -1881,9 +1998,20 @@ function addXP(amount) {
 // PANELS
 // ═══════════════════════════════════════════════
 function showPanel(id, el) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => { p.classList.remove('active'); p.classList.remove('panel-enter'); });
   document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-  document.getElementById('panel-' + id).classList.add('active');
+  const panel = document.getElementById('panel-' + id);
+  panel.classList.add('active');
+  // stagger cards
+  panel.querySelectorAll('.game-card, .brand-item, .venue-item, .region-card').forEach((c, i) => {
+    c.classList.remove('card-enter');
+    void c.offsetWidth;
+    c.style.animationDelay = (i * 55) + 'ms';
+    c.classList.add('card-enter');
+  });
+  // panel slide
+  void panel.offsetWidth;
+  panel.classList.add('panel-enter');
   const nav = el || (typeof event !== 'undefined' && event.currentTarget) || document.querySelector(`.nav-link[onclick*="'${id}'"]`);
   if (nav) nav.classList.add('active');
 }
@@ -2327,6 +2455,7 @@ function showModal(type, data) {
       <div class="modal-body"><p>You\'re leveling up. New venues, new regions, and new deals are opening up. Keep grinding.</p></div>
       <div class="modal-rewards">LEVEL ${data.level} REACHED</div>
       <button class="modal-btn" onclick="closeModal()">LET\'S GO</button>`;
+    setTimeout(launchConfetti, 200);
   }
   document.getElementById('modalContent').innerHTML = html;
   document.getElementById('modalOverlay').classList.add('open');
