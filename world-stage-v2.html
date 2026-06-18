@@ -1885,6 +1885,7 @@ function initHub() {
   buildBrandGrid();
   buildVenueList();
   updateStats();
+  setTimeout(() => showPanel('career'), 80);
   toast(`Welcome to the game, ${G.name}! Start by recording a track.`);
 }
 
