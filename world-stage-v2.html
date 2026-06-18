@@ -63,8 +63,15 @@
 
   /* ── SPLASH ── */
   #splash {
-    background: radial-gradient(ellipse at center, #1a0a2e 0%, #0a0a0f 70%);
+    background: url('assets/images/01_splash_screen.png') center/cover no-repeat;
     z-index: 10;
+  }
+  #splash::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 1;
   }
   .splash-logo {
     font-family: 'Bebas Neue', cursive;
@@ -147,11 +154,19 @@
 
   /* ── CHARACTER CREATION ── */
   #charCreate {
-    background: var(--dark2);
+    background: url('assets/images/02_character_select.png') center/cover no-repeat;
     padding: 32px 16px 48px;
     z-index: 10;
     align-items: center;
   }
+  #charCreate::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    z-index: 1;
+  }
+  #charCreate .cc-container { z-index: 2; }
   .cc-container {
     width: 100%;
     max-width: 800px;
@@ -801,6 +816,65 @@
     max-height: 85vh;
     overflow-y: auto;
   }
+  .modal-box.has-bg {
+    background-size: cover;
+    background-position: center;
+  }
+  .modal-box.has-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    background: rgba(0,0,0,0.72);
+    z-index: 0;
+  }
+  .modal-box.has-bg > * { position: relative; z-index: 1; }
+  /* Mentor Miles NPC card */
+  .mentor-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--card);
+    border: 1px solid var(--gold);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+  }
+  .mentor-card:hover { box-shadow: 0 0 20px rgba(255,215,0,0.25); }
+  .mentor-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: top;
+    border: 2px solid var(--gold);
+    flex-shrink: 0;
+  }
+  .mentor-info { flex: 1; min-width: 0; }
+  .mentor-name {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 18px;
+    color: var(--gold);
+    letter-spacing: 0.08em;
+  }
+  .mentor-quote {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin-top: 2px;
+  }
+  .mentor-badge {
+    font-size: 10px;
+    font-family: 'Space Mono', monospace;
+    color: var(--gold);
+    background: rgba(255,215,0,0.08);
+    border: 1px solid rgba(255,215,0,0.2);
+    padding: 3px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
   @keyframes modalIn {
     from { opacity:0; transform: scale(0.92) translateY(16px); }
     to   { opacity:1; transform: scale(1) translateY(0); }
@@ -1239,6 +1313,15 @@
     <div class="panel active" id="panel-career">
       <div class="panel-title" id="careerRegionTitle">ATLANTA, GA</div>
       <div class="panel-sub" id="careerRegionSub">Your journey begins here. Build your career, register your music, and level up.</div>
+      <!-- Mentor Miles NPC -->
+      <div class="mentor-card" onclick="showMentor()">
+        <img class="mentor-avatar" src="assets/images/07_mentor_miles.jpg" alt="Mentor Miles">
+        <div class="mentor-info">
+          <div class="mentor-name">MENTOR MILES</div>
+          <div class="mentor-quote" id="mentorQuote">"The charts don't lie, young blood. Now let's think strategy."</div>
+        </div>
+        <div class="mentor-badge">TAP FOR ADVICE</div>
+      </div>
       <div class="cards-grid">
         <div class="game-card" onclick="doAction('record')">
           <div class="card-icon">🎙️</div>
@@ -2126,8 +2209,54 @@ function showLesson(key) {
 // ═══════════════════════════════════════════════
 let pendingLevelUp = null;
 
+const MENTOR_QUOTES = [
+  "The charts don't lie, young blood. Now let's think strategy.",
+  "You can't own your career if you don't own your masters. Register everything.",
+  "Streams pay fractions. Royalties pay forever. Learn the difference.",
+  "Every city has its own sound. Tap into it or get drowned out.",
+  "Your drip is your brand. Don't let anyone out-dress you at your own show.",
+  "A feature can double your reach overnight. Choose your collabs wisely.",
+  "No PRO registration? You're leaving money on the table every single night.",
+  "The label signs your name, but they don't own your hustle. Stay sharp.",
+  "Street cred opens doors no check can buy. Protect your reputation.",
+  "Build the fanbase first. The deals will come looking for you."
+];
+
+const MODAL_BACKGROUNDS = {
+  record: "assets/images/03_recording_studio.png",
+  venue:  "assets/images/04_concert_venue.png",
+  levelUp: "assets/images/06_levelup_popup.png"
+};
+
+function showMentor() {
+  const q = MENTOR_QUOTES[Math.floor(Math.random() * MENTOR_QUOTES.length)];
+  document.getElementById('mentorQuote').textContent = `"${q}"`;
+  const box = document.getElementById('modalBox');
+  box.style.backgroundImage = `url('assets/images/07_mentor_miles.jpg')`;
+  box.style.backgroundSize = 'cover';
+  box.style.backgroundPosition = 'center top';
+  box.classList.add('has-bg');
+  const html = `
+    <div class="modal-icon">🎙️</div>
+    <div class="modal-title">MENTOR MILES</div>
+    <div class="modal-body"><p style="font-size:16px;font-style:italic;color:var(--gold);">"${q}"</p></div>
+    <div class="modal-law-box">💡 <strong>Industry Insight:</strong><br>Mentor Miles has 30 years in the game — A&R, management, publishing. He's seen artists rise and fall. Every tip he drops is earned the hard way.</div>
+    <button class="modal-btn" onclick="closeModal()">RESPECT 🤝</button>`;
+  document.getElementById('modalContent').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
 function showModal(type, data) {
   let html = '';
+  const box = document.getElementById('modalBox');
+  const bg = MODAL_BACKGROUNDS[type];
+  if (bg) {
+    box.style.backgroundImage = `url('${bg}')`;
+    box.classList.add('has-bg');
+  } else {
+    box.style.backgroundImage = '';
+    box.classList.remove('has-bg');
+  }
   if (type === 'record') {
     const a = data.a;
     const prompt = data.prompt || buildSunoPrompt();
@@ -2205,6 +2334,9 @@ function showModal(type, data) {
 
 function closeModal() {
   document.getElementById('modalOverlay').classList.remove('open');
+  const box = document.getElementById('modalBox');
+  box.style.backgroundImage = '';
+  box.classList.remove('has-bg');
   if (pendingLevelUp) {
     const lvl = pendingLevelUp;
     pendingLevelUp = null;
