@@ -1853,8 +1853,8 @@ function doAction(key) {
   if (key === 'record') {
     const prompt = buildSunoPrompt();
     const sunoUrl = `https://suno.com/create?prompt=${encodeURIComponent(prompt)}`;
-    window.open(sunoUrl, '_blank');
-    showModal('record', { a });
+    try { window.open(sunoUrl, '_blank'); } catch(e) {}
+    showModal('record', { a, prompt });
     return;
   }
   G.money    -= a.cost;
@@ -2130,14 +2130,16 @@ function showModal(type, data) {
   let html = '';
   if (type === 'record') {
     const a = data.a;
-    const prompt = buildSunoPrompt();
+    const prompt = data.prompt || buildSunoPrompt();
+    const sunoUrl = `https://suno.com/create?prompt=${encodeURIComponent(prompt)}`;
     html = `
       <div class="modal-icon">🎙️</div>
-      <div class="modal-title">🎙️ SUNO STUDIO OPEN</div>
+      <div class="modal-title">SUNO STUDIO</div>
       <div class="modal-body">
-        <p>Suno just opened in a new tab with your prompt:</p>
-        <div class="modal-law-box" style="font-family:monospace;font-size:12px;word-break:break-word;">"${prompt}"</div>
-        <p style="margin-top:12px;">Generate your track on Suno, then come back and hit the button below to collect your rewards.</p>
+        <p>Your track prompt is ready. If Suno didn't open automatically, tap the button below:</p>
+        <a href="${sunoUrl}" target="_blank" style="display:block;margin:10px 0;padding:10px;background:var(--accent);color:#000;border-radius:8px;text-align:center;font-weight:700;text-decoration:none;">🎵 OPEN SUNO →</a>
+        <div class="modal-law-box" style="font-family:monospace;font-size:11px;word-break:break-word;margin-top:8px;">"${prompt}"</div>
+        <p style="margin-top:12px;font-size:13px;">Make your track, then come back and collect your rewards.</p>
       </div>
       <div class="modal-rewards">+$${a.money.toLocaleString()} · +${fmtNum(a.streams)} streams · +${fmtNum(a.follow)} followers · +${a.xp} XP</div>
       <button class="modal-btn" onclick="collectTrack()">🎵 I MADE MY TRACK</button>`;
