@@ -1370,6 +1370,88 @@
     .regions-list { grid-template-columns: 1fr; }
     .brand-grid   { grid-template-columns: 1fr; }
   }
+
+  /* ══════════════ WAVEFORM ══════════════ */
+  .waveform { display:flex; align-items:center; justify-content:center; gap:3px; height:48px; margin:16px 0; }
+  .wave-bar { width:4px; background:linear-gradient(to top,var(--gold),var(--gold2)); border-radius:2px; animation:waveBeat var(--d,.8s) ease-in-out infinite alternate; }
+  @keyframes waveBeat { from{height:4px;opacity:.4} to{height:40px;opacity:1} }
+
+  /* ══════════════ ALBUM TRACKER ══════════════ */
+  .album-tracker { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:12px 16px; margin-bottom:16px; display:flex; align-items:center; gap:14px; }
+  .track-dots { display:flex; gap:6px; }
+  .track-dot { width:12px; height:12px; border-radius:50%; background:var(--dark3); border:2px solid var(--border); transition:all .3s; }
+  .track-dot.filled { background:var(--gold); border-color:var(--gold); box-shadow:0 0 8px rgba(255,215,0,.5); animation:dotPop .4s cubic-bezier(.22,1,.36,1); }
+  @keyframes dotPop { from{transform:scale(.5)} to{transform:scale(1)} }
+  .album-label { font-family:'Bebas Neue',cursive; font-size:14px; color:var(--gold); letter-spacing:.08em; }
+  .album-sub { font-size:10px; color:var(--muted); margin-top:2px; }
+  .btn-album { padding:8px 14px; background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#0a0a0f; font-family:'Bebas Neue',cursive; font-size:13px; letter-spacing:.1em; border:none; border-radius:6px; cursor:pointer; opacity:0; pointer-events:none; transition:opacity .3s,transform .2s; white-space:nowrap; }
+  .btn-album.ready { opacity:1; pointer-events:auto; animation:pulse 2s ease-in-out infinite; }
+  .btn-album:active { transform:scale(.97); }
+
+  /* ══════════════ NPC ROW ══════════════ */
+  .npc-row { display:flex; gap:10px; margin-bottom:16px; overflow-x:auto; padding-bottom:4px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+  .npc-row::-webkit-scrollbar { display:none; }
+  .npc-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px 10px; cursor:pointer; min-width:100px; flex-shrink:0; transition:all .25s; position:relative; text-align:center; }
+  .npc-card:hover { border-color:var(--gold); transform:translateY(-3px); box-shadow:0 8px 24px rgba(255,215,0,.15); }
+  .npc-avatar-wrap { position:relative; width:50px; height:50px; margin:0 auto 8px; }
+  .npc-emoji { width:50px; height:50px; border-radius:50%; background:var(--dark3); border:2px solid var(--border); font-size:24px; line-height:50px; text-align:center; }
+  .npc-status-dot { position:absolute; bottom:1px; right:1px; width:11px; height:11px; border-radius:50%; border:2px solid var(--card); }
+  .npc-status-dot.online { background:var(--green); }
+  .npc-status-dot.busy   { background:var(--gold); animation:npcPing 2s ease-in-out infinite; }
+  .npc-status-dot.rival  { background:var(--red);  animation:npcPing 1.5s ease-in-out infinite; }
+  @keyframes npcPing { 0%,100%{transform:scale(1)} 50%{transform:scale(1.35);box-shadow:0 0 6px currentColor} }
+  .npc-name { font-family:'Bebas Neue',cursive; font-size:12px; color:var(--text); letter-spacing:.05em; }
+  .npc-role { font-size:9px; color:var(--muted); margin-top:1px; }
+  .npc-notif { position:absolute; top:5px; right:5px; background:var(--red); color:#fff; font-size:8px; font-weight:700; width:14px; height:14px; border-radius:50%; display:flex; align-items:center; justify-content:center; animation:npcPing 2s ease-in-out infinite; }
+
+  /* ══════════════ RANDOM EVENT ══════════════ */
+  .event-tag { display:inline-block; font-size:10px; font-family:'Space Mono',monospace; background:rgba(255,68,102,.12); color:var(--red); border:1px solid rgba(255,68,102,.25); padding:3px 10px; border-radius:20px; letter-spacing:.1em; margin-bottom:10px; }
+  .event-choices { display:flex; flex-direction:column; gap:8px; margin-top:14px; }
+  .event-choice-btn { padding:12px 14px; background:var(--dark3); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:13px; cursor:pointer; text-align:left; transition:all .2s; line-height:1.5; }
+  .event-choice-btn:hover { border-color:var(--gold); background:rgba(255,215,0,.05); color:var(--gold); }
+  .choice-outcome { display:block; font-size:10px; font-family:'Space Mono',monospace; color:var(--green); margin-top:4px; }
+
+  /* ══════════════ SOCIAL FEED ══════════════ */
+  .social-feed { display:flex; flex-direction:column; gap:12px; }
+  .feed-post { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; animation:cardSlideUp .4s ease both; }
+  .feed-header { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .feed-avatar-wrap { width:34px; height:34px; border-radius:50%; overflow:hidden; border:2px solid var(--gold); flex-shrink:0; background:var(--dark3); display:flex; align-items:center; justify-content:center; font-size:16px; }
+  .feed-avatar-wrap img { width:100%; height:100%; object-fit:cover; }
+  .feed-name { font-family:'Bebas Neue',cursive; font-size:13px; color:var(--gold); }
+  .feed-time { font-size:9px; color:var(--muted); }
+  .feed-text { font-size:13px; color:var(--text); line-height:1.6; margin-bottom:10px; }
+  .feed-meta { display:flex; gap:16px; border-top:1px solid var(--border); padding-top:8px; }
+  .feed-btn { font-size:11px; color:var(--muted); cursor:pointer; transition:color .2s; background:none; border:none; padding:0; }
+  .feed-btn:hover { color:var(--gold); }
+  .feed-empty { text-align:center; padding:60px 20px; color:var(--muted); }
+  .feed-empty-icon { font-size:48px; margin-bottom:12px; }
+
+  /* ══════════════ CROWD STAGE ══════════════ */
+  .crowd-stage { position:relative; height:64px; overflow:hidden; margin:14px 0 8px; border-radius:8px; background:linear-gradient(to bottom,rgba(255,107,0,.05),transparent); }
+  .crowd-bar { position:absolute; bottom:0; width:6px; background:rgba(255,215,0,.45); border-radius:2px 2px 0 0; animation:crowdBounce var(--d,.6s) ease-in-out infinite alternate; }
+  @keyframes crowdBounce { from{height:12px;opacity:.25} to{height:50px;opacity:.9} }
+  .crowd-spotlight { position:absolute; inset:0; pointer-events:none; animation:spotSweep 2.5s ease-in-out infinite alternate; }
+  @keyframes spotSweep { from{background:radial-gradient(ellipse at 25% 0%,rgba(255,215,0,.22) 0%,transparent 65%)} to{background:radial-gradient(ellipse at 75% 0%,rgba(255,107,53,.22) 0%,transparent 65%)} }
+
+  /* ══════════════ HIGGSFIELD BTN ══════════════ */
+  .btn-higgsfield { display:inline-flex; align-items:center; gap:8px; padding:9px 16px; background:linear-gradient(135deg,#6644ff,#4488ff); color:#fff; font-family:'Bebas Neue',cursive; font-size:13px; letter-spacing:.1em; border:none; border-radius:6px; cursor:pointer; transition:all .2s; width:100%; justify-content:center; margin-top:6px; }
+  .btn-higgsfield:hover { filter:brightness(1.15); transform:translateY(-1px); }
+
+  /* ══════════════ DAY TICKER ══════════════ */
+  .day-ticker { padding:7px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; font-family:'Space Mono',monospace; font-size:10px; color:var(--muted); }
+  .day-ticker-val { color:var(--gold); font-weight:700; }
+
+  /* ══════════════ RIVAL SNIPE ══════════════ */
+  .rival-snipe { background:rgba(255,68,102,.06); border:1px solid rgba(255,68,102,.2); border-radius:8px; padding:10px 13px; margin-bottom:14px; display:flex; align-items:center; gap:10px; font-size:12px; color:var(--muted); }
+  .rival-name { font-family:'Bebas Neue',cursive; font-size:13px; color:var(--red); letter-spacing:.05em; }
+
+  /* ══════════════ LABEL DEAL ══════════════ */
+  .deal-terms { display:flex; flex-direction:column; gap:8px; margin:14px 0; }
+  .deal-term { display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:var(--dark3); border:1px solid var(--border); border-radius:6px; font-size:13px; }
+  .deal-term-label { color:var(--muted); }
+  .deal-term-val { color:var(--gold); font-family:'Space Mono',monospace; font-size:12px; }
+  .deal-term.bad  .deal-term-val { color:var(--red); }
+  .deal-term.good .deal-term-val { color:var(--green); }
 </style>
 </head>
 <body>
@@ -1420,9 +1502,11 @@
           <img id="photoPreview" style="display:none;" alt="Your photo">
         </div>
         <input type="file" id="photoInput" accept="image/*" onchange="handlePhoto(event)">
-        <div style="font-size:11px;color:var(--muted);text-align:center;max-width:160px;">
+        <div style="font-size:11px;color:var(--muted);text-align:center;max-width:160px;margin-bottom:6px;">
           Your photo becomes your in-game character
         </div>
+        <button class="btn-higgsfield" onclick="openHiggsfield('game_dump')">🎮 GET GAME AVATAR</button>
+        <div style="font-size:9px;color:var(--muted);text-align:center;margin-top:4px;">Powered by Higgsfield AI</div>
       </div>
 
       <!-- Form -->
@@ -1509,12 +1593,18 @@
         <div class="stat-bar"><div class="stat-fill" id="barCred" style="width:0%;background:var(--green)"></div></div>
       </div>
     </div>
+    <div class="day-ticker">
+      <span>📅 DAY <span class="day-ticker-val" id="dayTicker">1</span></span>
+      <span>🎵 TRACKS <span class="day-ticker-val" id="trackTicker">0</span>/5</span>
+      <span>⭐ REP <span class="day-ticker-val" id="repTicker">0</span></span>
+    </div>
     <div class="nav-links">
       <div class="nav-link active" onclick="showPanel('career')"><span class="nav-icon">🎤</span><span>Career</span></div>
-      <div class="nav-link" onclick="showPanel('map')"><span class="nav-icon">🗺️</span><span>World Map</span></div>
-      <div class="nav-link" onclick="showPanel('fashion')"><span class="nav-icon">👑</span><span>Fashion</span></div>
-      <div class="nav-link" onclick="showPanel('pro')"><span class="nav-icon">📋</span><span>Register PRO</span></div>
+      <div class="nav-link" onclick="showPanel('map')"><span class="nav-icon">🗺️</span><span>World</span></div>
+      <div class="nav-link" onclick="showPanel('fashion')"><span class="nav-icon">👑</span><span>Drip</span></div>
+      <div class="nav-link" onclick="showPanel('pro')"><span class="nav-icon">📋</span><span>PRO</span></div>
       <div class="nav-link" onclick="showPanel('venues')"><span class="nav-icon">🎪</span><span>Venues</span></div>
+      <div class="nav-link" onclick="showPanel('feed')"><span class="nav-icon">📰</span><span>Feed</span></div>
       <div class="nav-link" onclick="showPanel('education')"><span class="nav-icon">📚</span><span>Learn</span></div>
     </div>
     <div class="money-display">
@@ -1561,6 +1651,35 @@
         <img src="assets/images/banner_career.jpg" alt="World Stage" id="careerHeroImg">
         <div class="panel-hero-label" id="careerHeroLabel">🎤 BUILD YOUR EMPIRE</div>
       </div>
+      <!-- Rival ticker -->
+      <div class="rival-snipe" id="rivalSnipe" style="display:none">
+        <span class="rival-ticker-emoji">🔥</span>
+        <div>
+          <div class="rival-name" id="rivalName">DRIZZYGHOST</div>
+          <div id="rivalTaunt" style="font-size:11px">"You ain't ready for this level."</div>
+        </div>
+        <div style="margin-left:auto;font-size:10px;color:var(--red);font-family:'Space Mono',monospace" id="rivalStats"></div>
+      </div>
+
+      <!-- NPC Row -->
+      <div class="npc-row" id="npcRow"></div>
+
+      <!-- Album Tracker -->
+      <div class="album-tracker">
+        <div class="track-dots" id="trackDots">
+          <div class="track-dot" id="td0"></div>
+          <div class="track-dot" id="td1"></div>
+          <div class="track-dot" id="td2"></div>
+          <div class="track-dot" id="td3"></div>
+          <div class="track-dot" id="td4"></div>
+        </div>
+        <div class="album-info">
+          <div class="album-label" id="albumLabel">RECORDING ALBUM</div>
+          <div class="album-sub" id="albumSub">Record 5 tracks to drop your debut</div>
+        </div>
+        <button class="btn-album" id="btnAlbum" onclick="releaseAlbum()">DROP IT 🔥</button>
+      </div>
+
       <!-- Mentor Miles NPC -->
       <div class="mentor-card" onclick="showMentor()">
         <img class="mentor-avatar" src="assets/images/07_mentor_miles.jpg" alt="Mentor Miles">
@@ -1870,6 +1989,18 @@
       </div>
     </div>
 
+    <!-- ── SOCIAL FEED PANEL ── -->
+    <div class="panel" id="panel-feed">
+      <div class="panel-title">YOUR FEED</div>
+      <div class="panel-sub">Your career in real-time. Every move you make lives here.</div>
+      <div class="social-feed" id="socialFeed">
+        <div class="feed-empty">
+          <div class="feed-empty-icon">📭</div>
+          <div>No posts yet. Start your career to fill the feed.</div>
+        </div>
+      </div>
+    </div>
+
   </div><!-- /main-content -->
 </div><!-- /hub -->
 
@@ -1930,11 +2061,14 @@ let G = {
   name: '', genre: '', city: '', photo: null, region: 'atlanta',
   level: 1, xp: 0, xpMax: 200,
   money: 500, streams: 0, following: 0,
-  dripScore: 0, streetCred: 0,
+  dripScore: 0, streetCred: 0, reputation: 0,
+  tracks: 0, albums: 0, day: 1, actionCount: 0,
+  socialFeed: [],
   ownedBrands: [],
   registeredPROs: [],
   completedActions: [],
-  completedLessons: []
+  completedLessons: [],
+  rivalBeats: 0, labelDeal: null
 };
 
 let selectedGenre = '';
@@ -2082,6 +2216,8 @@ function initHub() {
   updateRegionUI();
   buildBrandGrid();
   buildVenueList();
+  buildNPCRow();
+  buildSocialFeed();
   updateStats();
   setTimeout(() => showPanel('career'), 80);
   toast(`Welcome to the game, ${G.name}! Start by recording a track.`);
@@ -2127,7 +2263,6 @@ function updateStats() {
   flashStat(document.getElementById('statDrip'),     G.dripScore,  v => v.toString());
   flashStat(document.getElementById('statCred'),     G.streetCred, v => v.toString());
   flashStat(document.getElementById('sidebarMoney'), G.money,      v => '$' + v.toLocaleString());
-  // Mobile stat strip
   const mc = id => document.getElementById(id);
   if (mc('mobileChipMoney'))   mc('mobileChipMoney').textContent   = '$' + G.money.toLocaleString();
   if (mc('mobileChipStreams'))  mc('mobileChipStreams').textContent  = fmtNum(G.streams);
@@ -2145,6 +2280,20 @@ function updateStats() {
   document.getElementById('dripScoreBig').textContent = G.dripScore;
   document.getElementById('dripBarFill').style.width = G.dripScore + '%';
   document.getElementById('dripTierLabel').textContent = getDripTier(G.dripScore);
+  // Day / track / rep tickers
+  if (mc('dayTicker'))   mc('dayTicker').textContent  = G.day;
+  if (mc('trackTicker')) mc('trackTicker').textContent = G.tracks;
+  if (mc('repTicker'))   mc('repTicker').textContent  = G.reputation;
+  // Album tracker dots
+  for (let i = 0; i < 5; i++) {
+    const dot = mc('td' + i);
+    if (dot) dot.classList.toggle('filled', i < G.tracks);
+  }
+  if (mc('btnAlbum')) mc('btnAlbum').classList.toggle('ready', G.tracks >= 5);
+  if (mc('albumLabel')) mc('albumLabel').textContent = G.tracks >= 5 ? '🔥 ALBUM READY TO DROP!' : 'RECORDING ALBUM';
+  if (mc('albumSub'))   mc('albumSub').textContent   = G.tracks >= 5 ? 'Drop it and blow up!' : `Record ${5 - G.tracks} more track${5 - G.tracks !== 1 ? 's' : ''} to release`;
+  // Rival snipe
+  updateRivalSnipe();
   saveGame();
 }
 
@@ -2288,25 +2437,44 @@ function doAction(key) {
     showModal('record', { a, prompt });
     return;
   }
-  G.money    -= a.cost;
-  G.streams  += a.streams;
-  G.following+= a.follow;
-  G.money    += a.money;
-  G.streetCred+= a.cred || 0;
-  G.dripScore = Math.min(100, G.dripScore + (a.drip||0));
+  G.money     -= a.cost;
+  G.streams   += a.streams;
+  G.following += a.follow;
+  G.money     += a.money;
+  G.streetCred += a.cred || 0;
+  G.dripScore  = Math.min(100, G.dripScore + (a.drip || 0));
+  G.day        += 1;
+  G.actionCount += 1;
   addXP(a.xp);
+  // Feed post
+  const feedMsgs = {
+    social:      `Just dropped new content on TikTok & IG 📱 +${fmtNum(a.follow)} new followers`,
+    collab:      `Collab session in the studio 🤝 +${fmtNum(a.streams)} streams incoming`,
+    sync:        `Pitched a sync license today 🎬 Landed $${a.money.toLocaleString()}`,
+    distributor: `Music is live on all DSPs 📦 +${fmtNum(a.streams)} streams`,
+    manager:     `Just hired management 💼 New connections unlocked`
+  };
+  if (feedMsgs[key]) addToFeed(feedMsgs[key]);
   showModal('action', { title: a.title, law: a.law, money: a.money, streams: a.streams, follow: a.follow });
+  // Random event every 3 actions
+  if (G.actionCount % 3 === 0) setTimeout(triggerRandomEvent, 800);
 }
 
 function collectTrack() {
   const a = ACTIONS['record'];
-  G.streams  += a.streams;
-  G.following+= a.follow;
-  G.money    += a.money;
-  G.streetCred+= a.cred || 0;
+  G.streams   += a.streams;
+  G.following += a.follow;
+  G.money     += a.money;
+  G.streetCred += a.cred || 0;
+  G.tracks    = Math.min(5, G.tracks + 1);
+  G.day       += 1;
+  G.actionCount += 1;
   addXP(a.xp);
+  addToFeed(`🎵 Just laid down Track ${G.tracks} in the studio. +${fmtNum(a.streams)} streams`);
   closeModal();
-  toast('🎵 Track collected! Rewards applied.', 'success');
+  updateStats();
+  toast(`🎵 Track ${G.tracks}/5 recorded! ${G.tracks >= 5 ? 'Album ready to DROP!' : `${5 - G.tracks} more to go.`}`, 'success');
+  if (G.actionCount % 3 === 0) setTimeout(triggerRandomEvent, 800);
 }
 
 // ═══════════════════════════════════════════════
@@ -2692,6 +2860,395 @@ function closeModal() {
     setTimeout(() => showModal('levelUp', { level: lvl }), 150);
   }
 }
+
+// ═══════════════════════════════════════════════
+// RANDOM EVENTS
+// ═══════════════════════════════════════════════
+const RANDOM_EVENTS = [
+  {
+    id:'bet_shoot', title:'📸 BET PHOTOSHOOT REQUEST',
+    body:`BET Magazine wants you for their Rising Artists feature. Their photographer is in town ONE day only. Do it free for the culture — or charge your rate?`,
+    choices:[
+      { text:'📸 Do it free — "It\'s the culture"',           outcome:{follow:800,  cred:8,   rep:5},   desc:'+800 followers · +8 Cred · +5 Rep' },
+      { text:'💰 Charge $3,000 — your time has value',        outcome:{money:3000,  cred:-3},            desc:'+$3,000 · -3 Cred (they called you "difficult")' },
+      { text:'🤝 Counter: $500 + full photo credits',         outcome:{money:500,   follow:400, cred:5}, desc:'+$500 · +400 followers · +5 Cred' }
+    ]
+  },
+  {
+    id:'tiktok_viral', title:'🔥 YOUR TRACK IS GOING VIRAL',
+    body:`One of your songs just appeared in 2.3M TikTok videos overnight. A sync licensing company is rushing an offer — or you can ride the organic wave yourself.`,
+    choices:[
+      { text:'✍️ Sign the quick sync deal — $1,500',          outcome:{money:1500,  streams:5000},         desc:'+$1,500 · +5K streams' },
+      { text:'📱 Ride the organic wave — push content NOW',   outcome:{follow:2000, streams:8000, rep:10}, desc:'+2K followers · +8K streams · +10 Rep' },
+      { text:'⏳ Hold out for a bigger offer',                 outcome:{rep:-5},                            desc:'Moment passes... -5 Rep (timing is everything)' }
+    ]
+  },
+  {
+    id:'rival_diss', title:'🎤 DRIZZYGHOST DROPPED A DISS',
+    body:`DrizzyGhost just released a freestyle calling you out by name. "CORNY MUSIC, NO REAL BARS." The internet is watching. What\'s your move?`,
+    choices:[
+      { text:'🎤 Drop a response track — 48 hours',           outcome:{cred:15, follow:500,  streams:2000}, desc:'+15 Cred · +500 followers · +2K streams' },
+      { text:'😤 Ignore it — don\'t feed the troll',          outcome:{cred:-5, rep:8},                     desc:'-5 Cred · +8 Rep (stayed classy)' },
+      { text:'👊 Call him out on IG Live right now',          outcome:{cred:20, follow:1000, rep:-10},       desc:'+20 Cred · +1K followers · -10 Rep (risky)' }
+    ]
+  },
+  {
+    id:'label_dm', title:'📧 MAJOR LABEL SLID INTO YOUR DMs',
+    body:`A Republic Records A&R just messaged: "Love your sound. Can we talk?" This is the call every indie artist dreams of — and fears. What do you do?`,
+    choices:[
+      { text:'📞 Take the meeting — stay curious',            outcome:{rep:15, money:500},     desc:'+15 Rep · +$500 (they covered lunch)' },
+      { text:'🚫 No thanks — I own my masters',               outcome:{rep:20, cred:10},        desc:'+20 Rep · +10 Cred (integrity move)' },
+      { text:'👨‍💼 Consult your attorney first',             outcome:{rep:10, money:-200},     desc:'+10 Rep · -$200 legal fee (smart)' }
+    ]
+  },
+  {
+    id:'hot97', title:'📻 FUNK FLEX WANTS YOU IN THE BUILDING',
+    body:`Hot 97 called. Flex wants you on his Friday night show for an exclusive freestyle. No script. No safety net. Just you and the mic in front of New York.`,
+    choices:[
+      { text:'🎤 Pull up — show them what you\'ve got',       outcome:{follow:2000, cred:20, rep:15}, desc:'+2K followers · +20 Cred · +15 Rep' },
+      { text:'😰 You\'re not ready — pass for now',           outcome:{cred:-8, rep:-5},               desc:'-8 Cred · -5 Rep (Flex never forgets)' }
+    ]
+  },
+  {
+    id:'nike_deal', title:'👟 NIKE WANTS A BRAND COLLAB',
+    body:`Nike\'s music marketing team hit your email. They want your image for a limited sneaker campaign tied to your city. Good money — but do they align with your brand?`,
+    choices:[
+      { text:'✅ Sign it — $5,000 + free kicks',              outcome:{money:5000, drip:8, cred:5},  desc:'+$5,000 · +8 Drip · +5 Cred' },
+      { text:'❌ Pass — building your own brand first',        outcome:{rep:12, cred:8},               desc:'+12 Rep · +8 Cred (staying independent)' }
+    ]
+  },
+  {
+    id:'grammy_buzz', title:'🏆 GRAMMY CONSIDERATION LIST',
+    body:`The Recording Academy just dropped their consideration list. Your name is on it for Best New Artist. You\'re not nominated yet — but the buzz is real and the press is calling.`,
+    choices:[
+      { text:'📣 Let your team handle the press run',         outcome:{rep:25, follow:1500},         desc:'+25 Rep · +1.5K followers' },
+      { text:'🎬 Drop a "grateful" campaign content push',   outcome:{rep:15, follow:3000, money:-100}, desc:'+15 Rep · +3K followers · -$100 production' }
+    ]
+  },
+  {
+    id:'royalty_check', title:'💰 SURPRISE ROYALTY CHECK',
+    body:`Your distributor just sent an unexpected report. A sync you pitched 6 months ago on a Netflix documentary finally cleared. The check just dropped.`,
+    choices:[
+      { text:'💸 Cash it — $2,400 hits different',            outcome:{money:2400, rep:8},            desc:'+$2,400 · +8 Rep' }
+    ]
+  },
+  {
+    id:'collab_offer', title:'🤝 PLATINUM ARTIST WANTS IN',
+    body:`A platinum-selling artist\'s team DM\'d you about a feature. They\'re proposing a 70/30 split — in their favor. You\'re hot right now. You have leverage.`,
+    choices:[
+      { text:'✍️ Accept 70/30 — the exposure is worth it',   outcome:{follow:5000, streams:10000},         desc:'+5K followers · +10K streams' },
+      { text:'⚖️ Counter with 50/50 — equal work equal pay', outcome:{follow:2000, streams:4000, rep:15},   desc:'+2K followers · +4K streams · +15 Rep' },
+      { text:'🚫 Walk away — you\'re worth more',             outcome:{rep:20, cred:10},                     desc:'+20 Rep · +10 Cred (know your value)' }
+    ]
+  },
+  {
+    id:'360_offer', title:'📝 LABEL WANTS TO OFFER A 360 DEAL',
+    body:`Your attorney forwarded a term sheet. A mid-size label is offering a 360 deal: they advance you $50K but take 20% of touring, merch, AND publishing. What do you do?`,
+    choices:[
+      { text:'✍️ Sign it — $50K advance secures the move',   outcome:{money:50000, rep:-10, cred:-5},   desc:'+$50,000 · -10 Rep · -5 Cred (they own you now)' },
+      { text:'⚖️ Counter: no 360, just recording only',      outcome:{money:5000,  rep:20},              desc:'+$5,000 signing bonus · +20 Rep (negotiated well)' },
+      { text:'🚫 Stay indie — own everything',                outcome:{rep:30, cred:15, streams:2000},   desc:'+30 Rep · +15 Cred · +2K streams (legend move)' }
+    ]
+  }
+];
+
+let _lastEventIdx = -1;
+function triggerRandomEvent() {
+  // Pick an event we haven't just shown
+  let idx;
+  do { idx = Math.floor(Math.random() * RANDOM_EVENTS.length); } while (idx === _lastEventIdx && RANDOM_EVENTS.length > 1);
+  _lastEventIdx = idx;
+  const ev = RANDOM_EVENTS[idx];
+  const choicesHTML = ev.choices.map((c, i) => `
+    <button class="event-choice-btn" onclick="resolveEvent(${idx},${i})">
+      ${c.text}
+      <span class="choice-outcome">${c.desc}</span>
+    </button>`).join('');
+  const box = document.getElementById('modalBox');
+  box.style.backgroundImage = '';
+  box.classList.remove('has-bg');
+  document.getElementById('modalContent').innerHTML = `
+    <div class="event-tag">⚡ INDUSTRY EVENT — DAY ${G.day}</div>
+    <div class="modal-title">${ev.title}</div>
+    <div class="modal-body">${ev.body}</div>
+    <div class="event-choices">${choicesHTML}</div>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function resolveEvent(evIdx, choiceIdx) {
+  const ev  = RANDOM_EVENTS[evIdx];
+  const ch  = ev.choices[choiceIdx];
+  const o   = ch.outcome;
+  if (o.money)   { G.money    += o.money;   }
+  if (o.follow)  { G.following += o.follow;  }
+  if (o.streams) { G.streams   += o.streams; }
+  if (o.cred)    { G.streetCred += o.cred;   }
+  if (o.drip)    { G.dripScore  = Math.min(100, G.dripScore + o.drip); }
+  if (o.rep)     { G.reputation += o.rep;    }
+  addXP(40);
+  addToFeed(`${ev.title} — chose: "${ch.text.replace(/[🎤📸💰🤝✍️📱⏳😤👊📞🚫👨‍💼😰✅❌📣🎬💸⚖️]/gu, '').trim()}" ${ch.desc}`);
+  closeModal();
+  updateStats();
+  toast(`Event resolved! ${ch.desc}`, 'success');
+}
+
+// ═══════════════════════════════════════════════
+// NPCs
+// ═══════════════════════════════════════════════
+const NPC_DATA = [
+  {
+    id:'keisha', name:'KEISHA T.', role:'A&R · Republic Records', emoji:'👩🏾', status:'busy',
+    minLevel:1,
+    dialogue: [
+      { q:'Listen to my demo', a:`"I've heard a thousand demos this week. Yours actually made me stop scrolling. The production is there — the story needs work. Come back when you have 3 records with a clear POV and we'll talk seriously."`, reward:{rep:8, xp:30} },
+      { q:'Talk about a 360 deal', a:`"A 360 deal means we touch everything — touring, merch, brand deals, publishing. In exchange you get our machine behind you. The question is: how much of your future are you willing to sell today?"`, reward:{rep:5, xp:50}, lesson:'360' },
+      { q:'Ask about publishing splits', a:`"Standard is 50/50 with the label's publishing arm. My advice? Before you sign anything, register every song you've ever written with the Copyright Office. Once it's registered, it's yours in court."`, reward:{rep:10, xp:40} }
+    ]
+  },
+  {
+    id:'ghost', name:'DRIZZYGHOST', role:'Rival Artist', emoji:'👻', status:'rival',
+    minLevel:0,
+    dialogue: [
+      { q:'Respond to the diss', a:`"Oh you finally showed up? I've been waiting. Drop something in 48 hours or the streets are gonna say you folded. No features, no producers — just bars. Let's see who you really are."`, reward:{cred:12, streams:1500, xp:40} },
+      { q:'Squash the beef', a:`"Squash it? Nah. Not until you can look me in the eye and tell me your streams are higher than mine. Beat my numbers then we can talk peace."`, reward:{rep:5, xp:20} },
+      { q:'Ignore him',          a:`"Smart move staying quiet. Sometimes silence is the loudest response. Your fans see him barking at someone who doesn't even look his way."`, reward:{rep:10, cred:-5, xp:25} }
+    ]
+  },
+  {
+    id:'izzy', name:'IZZY CHEN', role:'Playlist Curator · Spotify', emoji:'🎧', status:'online',
+    minLevel:1,
+    dialogue: [
+      { q:'Submit to a playlist', a:`"I get 400 submissions a week. What makes yours stand out is the metadata — the mood tags, the BPM, the release timing. Friday releases hit harder. And make sure you're verified on Spotify for Artists."`, reward:{streams:3000, rep:8, xp:35} },
+      { q:'Ask about the algorithm', a:`"Spotify's algorithm rewards completion rate and saves more than raw streams. If people skip your song in the first 30 seconds, you're dead in the algorithm. Hook them before the beat drops."`, reward:{rep:10, xp:40} },
+      { q:'Ask about editorial placement', a:`"Editorial playlists like RapCaviar or Fresh Finds are curated by humans, not algorithms. You need a distributor with a label services team who can pitch directly to Spotify's editorial team 7 days before release."`, reward:{rep:12, streams:1000, xp:45} }
+    ]
+  },
+  {
+    id:'lou', name:'BIG LOU', role:'Street Promoter', emoji:'📢', status:'online',
+    minLevel:0,
+    dialogue: [
+      { q:'Promote my show', a:`"I can paper the city with your face in 48 hours. $300 gets you 200 flyers, 50 posters, and I hit every barbershop on the east side. Cash only. Bring the energy and I bring the people."`, reward:{follow:400, cred:8, money:-300, xp:30} },
+      { q:'Build street cred', a:`"Street cred ain't bought — it's earned. Show up to other people's shows. Respect the OGs. Be real with the culture. I've seen people with a million followers get booed off stage because the streets didn't know them."`, reward:{cred:15, rep:5, xp:35} },
+      { q:'Ask about the scene', a:`"The scene right now is hungry. Everyone's looking for the next one. Open mics are back, real venues are booking new artists again. Get out there and perform. Every show is a audition."`, reward:{rep:8, xp:25} }
+    ]
+  }
+];
+
+function buildNPCRow() {
+  const row = document.getElementById('npcRow');
+  if (!row) return;
+  row.innerHTML = NPC_DATA.filter(n => G.level >= n.minLevel).map(n => `
+    <div class="npc-card" onclick="showNPC('${n.id}')">
+      ${n.status === 'rival' ? '<div class="npc-notif">!</div>' : ''}
+      <div class="npc-avatar-wrap">
+        <div class="npc-emoji">${n.emoji}</div>
+        <div class="npc-status-dot ${n.status}"></div>
+      </div>
+      <div class="npc-name">${n.name}</div>
+      <div class="npc-role">${n.role}</div>
+    </div>`).join('');
+}
+
+function showNPC(npcId) {
+  const npc = NPC_DATA.find(n => n.id === npcId);
+  if (!npc) return;
+  const box = document.getElementById('modalBox');
+  box.style.backgroundImage = '';
+  box.classList.remove('has-bg');
+  const optionsHTML = npc.dialogue.map((d, i) => `
+    <button class="event-choice-btn" onclick="resolveNPC('${npcId}',${i})">
+      💬 ${d.q}
+    </button>`).join('');
+  document.getElementById('modalContent').innerHTML = `
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+      <div style="font-size:40px;width:56px;height:56px;background:var(--dark3);border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid var(--gold);">${npc.emoji}</div>
+      <div>
+        <div class="modal-title" style="margin:0">${npc.name}</div>
+        <div style="font-size:11px;color:var(--muted)">${npc.role}</div>
+        <div style="font-size:10px;color:${npc.status==='rival'?'var(--red)':npc.status==='busy'?'var(--gold)':'var(--green)'};margin-top:3px;">● ${npc.status.toUpperCase()}</div>
+      </div>
+    </div>
+    <div class="modal-body">What do you want to talk about?</div>
+    <div class="event-choices">${optionsHTML}</div>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function resolveNPC(npcId, dialogueIdx) {
+  const npc = NPC_DATA.find(n => n.id === npcId);
+  const d   = npc.dialogue[dialogueIdx];
+  const r   = d.reward;
+  if (r.money)   G.money     += r.money;
+  if (r.streams) G.streams   += r.streams;
+  if (r.follow)  G.following += r.follow;
+  if (r.cred)    G.streetCred += r.cred;
+  if (r.rep)     G.reputation += r.rep;
+  if (r.xp)      addXP(r.xp);
+  if (r.lesson)  showLesson(r.lesson);
+  const box = document.getElementById('modalBox');
+  box.style.backgroundImage = '';
+  box.classList.remove('has-bg');
+  document.getElementById('modalContent').innerHTML = `
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+      <div style="font-size:40px;width:56px;height:56px;background:var(--dark3);border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid var(--gold);">${npc.emoji}</div>
+      <div>
+        <div class="modal-title" style="margin:0">${npc.name}</div>
+        <div style="font-size:11px;color:var(--muted)">${npc.role}</div>
+      </div>
+    </div>
+    <div class="modal-law-box" style="font-size:14px;font-style:italic;line-height:1.7;color:var(--text)">${d.a}</div>
+    ${r.streams || r.money || r.cred || r.rep ? `<div class="modal-rewards">${[r.money?'+$'+r.money.toLocaleString():'', r.streams?'+'+fmtNum(r.streams)+' streams':'', r.cred?'+'+r.cred+' Cred':'', r.rep?'+'+r.rep+' Rep':''].filter(Boolean).join(' · ')}</div>` : ''}
+    <button class="modal-btn" onclick="closeModal()">RESPECT 🤝</button>`;
+  updateStats();
+  addToFeed(`Linked up with ${npc.name} — "${d.q}"`);
+}
+
+// ═══════════════════════════════════════════════
+// ALBUM RELEASE
+// ═══════════════════════════════════════════════
+function releaseAlbum() {
+  if (G.tracks < 5) { toast('Need 5 tracks to drop an album!', 'error'); return; }
+  G.tracks    = 0;
+  G.albums   += 1;
+  G.streams  += 25000;
+  G.following += 3000;
+  G.money    += 8000;
+  G.reputation += 30;
+  G.streetCred += 20;
+  addXP(300);
+  launchConfetti();
+  updateStats();
+  addToFeed(`🔥 ALBUM ${G.albums} DROPPED! "${G.name.toUpperCase()}: VOL. ${G.albums}" — out everywhere now.`);
+  const box = document.getElementById('modalBox');
+  box.style.backgroundImage = `url('assets/images/06_levelup_popup.jpg')`;
+  box.style.backgroundSize = 'cover';
+  box.style.backgroundPosition = 'center';
+  box.classList.add('has-bg');
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-icon">🔥</div>
+    <div class="modal-title">ALBUM ${G.albums} DROPPED!</div>
+    <div class="modal-body"><p style="font-size:16px;color:var(--gold);font-style:italic">"${G.name.toUpperCase()}: VOL. ${G.albums}" is out everywhere. The internet is going crazy.</p></div>
+    <div class="modal-rewards">+25K streams · +3K fans · +$8,000 · +30 Rep · +300 XP</div>
+    <div class="modal-law-box">📖 <strong>Industry Law:</strong><br>Album royalties flow from two sources: mechanical royalties (per stream/download, via The MLC) and performance royalties (via your PRO — ASCAP, BMI, or SESAC). Make sure you're registered with BOTH before you drop.</div>
+    <button class="modal-btn" onclick="closeModal()">LET IT PLAY 🎵</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+// ═══════════════════════════════════════════════
+// SOCIAL FEED
+// ═══════════════════════════════════════════════
+function addToFeed(text) {
+  G.socialFeed.unshift({
+    text,
+    time: `Day ${G.day}`,
+    likes: Math.floor(Math.random() * 900) + 50,
+    comments: Math.floor(Math.random() * 80) + 5
+  });
+  if (G.socialFeed.length > 30) G.socialFeed.pop();
+  buildSocialFeed();
+}
+
+function buildSocialFeed() {
+  const el = document.getElementById('socialFeed');
+  if (!el) return;
+  if (!G.socialFeed || G.socialFeed.length === 0) {
+    el.innerHTML = `<div class="feed-empty"><div class="feed-empty-icon">📭</div><div>No posts yet. Start your career to fill the feed.</div></div>`;
+    return;
+  }
+  const avatarHTML = G.photo
+    ? `<img src="${G.photo}" alt="avatar">`
+    : G.name ? G.name[0].toUpperCase() : '🎤';
+  el.innerHTML = G.socialFeed.map((p, i) => `
+    <div class="feed-post" style="animation-delay:${i * 40}ms">
+      <div class="feed-header">
+        <div class="feed-avatar-wrap">${typeof avatarHTML === 'string' && avatarHTML.startsWith('<img') ? avatarHTML : `<span>${avatarHTML}</span>`}</div>
+        <div>
+          <div class="feed-name">${G.name ? G.name.toUpperCase() : 'ARTIST'}</div>
+          <div class="feed-time">${p.time} · ${G.city || 'ATL'}</div>
+        </div>
+      </div>
+      <div class="feed-text">${p.text}</div>
+      <div class="feed-meta">
+        <button class="feed-btn" onclick="this.style.color='var(--gold)'">❤️ ${p.likes}</button>
+        <button class="feed-btn">💬 ${p.comments}</button>
+        <button class="feed-btn">🔁 Share</button>
+      </div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════
+// RIVAL SYSTEM
+// ═══════════════════════════════════════════════
+const RIVAL_TAUNTS = [
+  '"You ain\'t ready for this level."',
+  '"My streams are 10x yours. Sit down."',
+  '"I heard your last track. Stay in your lane."',
+  '"The industry already forgot your name."',
+  '"Your manager called me. I passed."',
+  '"Nice drip. Too bad the music doesn\'t match."'
+];
+
+function updateRivalSnipe() {
+  const el = document.getElementById('rivalSnipe');
+  if (!el || G.tracks === 0) return;
+  el.style.display = 'flex';
+  const rivalStreams = Math.floor(G.streams * 1.3 + 5000);
+  document.getElementById('rivalName').textContent    = 'DRIZZYGHOST';
+  document.getElementById('rivalTaunt').textContent   = RIVAL_TAUNTS[G.day % RIVAL_TAUNTS.length];
+  document.getElementById('rivalStats').textContent   = fmtNum(rivalStreams) + ' streams';
+}
+
+// ═══════════════════════════════════════════════
+// HIGGSFIELD INTEGRATION
+// ═══════════════════════════════════════════════
+const HIGGSFIELD_APPS = {
+  game_dump:  'https://higgsfield.ai/apps/game-dump',
+  nano_strike:'https://higgsfield.ai/apps/nano-strike',
+  simlife:    'https://higgsfield.ai/apps/simlife',
+  nano_theft: 'https://higgsfield.ai/apps/nano-theft',
+  pixel_game: 'https://higgsfield.ai/apps/pixel-game',
+  plushies:   'https://higgsfield.ai/apps/plushies',
+  figure_3d:  'https://higgsfield.ai/apps/3d-figure'
+};
+
+function openHiggsfield(app) {
+  const url = HIGGSFIELD_APPS[app] || 'https://higgsfield.ai/apps/games-characters';
+  window.open(url, '_blank');
+  toast('🎮 Higgsfield opened! Upload your photo to get your game avatar, then save and use it as your character photo.', 'success');
+}
+
+// ═══════════════════════════════════════════════
+// VENUE MODAL — CROWD ANIMATION
+// ═══════════════════════════════════════════════
+window.bookVenue = function(name, fee, req) {
+  const follow_boost = Math.floor(fee * 0.8);
+  G.money     += fee;
+  G.following += follow_boost;
+  G.streetCred += 5;
+  G.reputation += 3;
+  G.day        += 1;
+  G.actionCount += 1;
+  addXP(60);
+  updateStats();
+  addToFeed(`🎤 Performed at ${name} tonight. +$${fee.toLocaleString()} · +${fmtNum(follow_boost)} new fans`);
+  // Build crowd HTML
+  const bars = Array.from({length: 40}, (_, i) => {
+    const d = (0.3 + Math.random() * 0.7).toFixed(2);
+    const l = (i / 39 * 100).toFixed(1);
+    return `<div class="crowd-bar" style="left:${l}%;--d:${d}s"></div>`;
+  }).join('');
+  const box = document.getElementById('modalBox');
+  box.style.backgroundImage = `url('assets/images/04_concert_venue.jpg')`;
+  box.classList.add('has-bg');
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-icon">🎤</div>
+    <div class="modal-title">SHOW NIGHT: ${name.toUpperCase()}</div>
+    <div class="crowd-stage">${bars}<div class="crowd-spotlight"></div></div>
+    <div class="modal-rewards">+$${fee.toLocaleString()} · +${fmtNum(follow_boost)} fans · +5 Cred · +3 Rep</div>
+    <div class="modal-law-box">📖 <strong>Performance Rights:</strong><br>Every live performance triggers performance royalties. If you\'re registered with a PRO (ASCAP, BMI, SESAC), the venue pays a blanket license fee and your PRO collects your share. No PRO = no performance royalties.</div>
+    <button class="modal-btn" onclick="closeModal()">TAKE THE STAGE 🎤</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+  if (G.actionCount % 3 === 0) setTimeout(triggerRandomEvent, 900);
+};
 </script>
 </body>
 </html>
