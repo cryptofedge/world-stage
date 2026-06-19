@@ -1391,48 +1391,41 @@
   <div class="note" style="left:45%;top:85%;animation-delay:2s">♪</div>
   <div class="note" style="left:60%;top:78%;animation-delay:0.8s">♫</div>
   <div class="splash-inner">
-    <!-- Brand mark: orange oval + Saturn ring + feather/quill -->
-    <svg class="splash-mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <defs>
-        <!-- Mask: show only OUTSIDE the oval (for back ring segment) -->
-        <mask id="mRingBack">
-          <rect width="100" height="100" fill="white"/>
-          <ellipse cx="50" cy="50" rx="37" ry="46" fill="black"/>
-        </mask>
-        <!-- Mask: show only BELOW y=56 (for front ring segment) -->
-        <mask id="mRingFront">
-          <rect x="-200" y="56" width="500" height="200" fill="white"/>
-        </mask>
-      </defs>
+    <!-- Brand mark: orange oval + quill feather + diagonal orbit band -->
+    <!-- viewBox extended left/right so orbit band can extend past oval -->
+    <svg class="splash-mark" xmlns="http://www.w3.org/2000/svg"
+         viewBox="-14 0 128 100" overflow="visible">
 
-      <!-- Ring — back half (outside oval, fades behind) -->
-      <ellipse cx="50" cy="54" rx="58" ry="11.5"
-        fill="none" stroke="rgba(255,255,255,0.38)" stroke-width="2.6"
-        transform="rotate(-13 50 54)" mask="url(#mRingBack)"/>
+      <!-- Orange oval -->
+      <ellipse cx="50" cy="50" rx="38" ry="48" fill="#F47820"/>
 
-      <!-- Orange oval body -->
-      <ellipse cx="50" cy="50" rx="37" ry="46" fill="#F47820"/>
-
-      <!-- White feather / quill-pen mark -->
-      <path fill="white" fill-rule="evenodd" d="
-        M 50 17
-        C 40 14 30 22 31 34
-        C 32 44 39 48 39 56
-        C 39 63 33 67 35 76
-        C 37 84 44 90 52 89
-        C 60 88 67 81 66 73
-        C 65 65 59 62 59 54
-        C 59 46 66 42 64 32
-        C 62 22 56 15 50 17 Z
-        M 50 20
-        C 48 27 48 35 50 41
-        C 52 35 52 27 50 20 Z
+      <!-- ── White feather vane (large, tilted left ~20°) ── -->
+      <!-- Outer silhouette of the feather blade -->
+      <path fill="white" d="
+        M 41 8
+        C 54 5 68 15 68 27
+        C 68 40 63 53 57 62
+        L 43 67
+        C 33 67 22 60 21 50
+        C 19 39 21 26 27 18
+        C 31 12 37 9 41 8 Z
+      "/>
+      <!-- Orange slit through feather blade (divides into two barbs) -->
+      <path fill="#F47820" d="
+        M 43 13 L 28 63 L 35 65 L 50 13 Z
       "/>
 
-      <!-- Ring — front half (over lower oval) -->
-      <ellipse cx="50" cy="54" rx="58" ry="11.5"
-        fill="none" stroke="rgba(255,255,255,0.88)" stroke-width="2.6"
-        transform="rotate(-13 50 54)" mask="url(#mRingFront)"/>
+      <!-- ── White quill nib (small rounded shape below ring) ── -->
+      <path fill="white" d="
+        M 46 73
+        C 51 68 60 67 65 71
+        C 71 75 71 84 66 89
+        C 61 94 51 92 47 88
+        C 43 84 43 78 46 73 Z
+      "/>
+
+      <!-- ── Diagonal orbit / ring band (extends outside oval) ── -->
+      <polygon fill="white" points="-14,64 114,54 114,61 -14,71"/>
     </svg>
 
     <div class="splash-logo">WORLD STAGE</div>
