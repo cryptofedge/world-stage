@@ -62,11 +62,15 @@
   #particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
 
   /* ── SPLASH ── */
-  #splash { z-index: 10; overflow: hidden; }
+  #splash {
+    z-index: 10;
+    overflow: hidden;
+    padding: 0;
+  }
   .splash-bg {
     position: absolute;
     inset: -5%;
-    background: url('assets/images/01_splash_screen.png') center/cover no-repeat;
+    background: url('assets/images/01_splash_screen.jpg') center/cover no-repeat;
     animation: kenBurns 18s ease-in-out infinite alternate;
     z-index: 0;
   }
@@ -74,8 +78,22 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0,0,0,0.55);
     z-index: 1;
+  }
+  /* Inner wrapper keeps content vertically centered and constrained */
+  .splash-inner {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 24px 20px env(safe-area-inset-bottom, 24px);
+    box-sizing: border-box;
+    gap: 0;
   }
   @keyframes kenBurns {
     from { transform: scale(1)    translateX(0)    translateY(0); }
@@ -83,60 +101,56 @@
   }
   .splash-logo {
     font-family: 'Bebas Neue', cursive;
-    font-size: clamp(72px, 12vw, 160px);
+    font-size: clamp(56px, 16vw, 160px);
+    line-height: 0.9;
     letter-spacing: 0.05em;
     background: linear-gradient(135deg, #FFD700, #FFA500, #ff6b35);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: logoGlow 2s ease-in-out infinite alternate, splashFadeUp 1s ease 0.1s both;
-    position: relative;
-    z-index: 2;
     text-shadow: none;
     filter: drop-shadow(0 0 40px rgba(255,165,0,0.4));
+    margin: 0;
   }
   .splash-sub {
     font-family: 'Space Mono', monospace;
-    font-size: clamp(12px, 2vw, 18px);
+    font-size: clamp(10px, 3.5vw, 18px);
     color: var(--gold);
-    letter-spacing: 0.3em;
+    letter-spacing: 0.25em;
     text-transform: uppercase;
-    opacity: 0.8;
-    margin-top: 8px;
-    z-index: 2;
-    position: relative;
+    opacity: 0.85;
+    margin-top: 10px;
     animation: splashFadeUp 1s ease 0.35s both;
   }
   .splash-tagline {
-    font-size: 14px;
+    font-size: clamp(11px, 3vw, 15px);
     color: var(--muted);
-    margin-top: 24px;
-    letter-spacing: 0.1em;
-    z-index: 2;
-    position: relative;
+    margin-top: 16px;
+    letter-spacing: 0.08em;
+    text-align: center;
     animation: splashFadeUp 1s ease 0.55s both;
   }
   .btn-start {
-    margin-top: 40px;
-    padding: 18px 52px;
+    margin-top: clamp(20px, 5vh, 48px);
+    padding: clamp(12px, 3vh, 18px) clamp(32px, 10vw, 52px);
     background: linear-gradient(135deg, var(--gold), var(--gold2));
     color: #0a0a0f;
     font-family: 'Bebas Neue', cursive;
-    font-size: 22px;
+    font-size: clamp(18px, 5vw, 24px);
     letter-spacing: 0.15em;
     border: none;
     cursor: pointer;
-    border-radius: 6px;
+    border-radius: 8px;
     transition: transform 0.15s, filter 0.15s;
-    position: relative;
-    z-index: 20;
     animation: pulse 2s ease-in-out infinite, splashFadeUp 1s ease 0.8s both;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
     user-select: none;
     -webkit-user-select: none;
     display: block;
+    min-height: 50px;
   }
-  .btn-start:hover { transform: scale(1.05); filter: brightness(1.2); }
+  .btn-start:hover  { transform: scale(1.05); filter: brightness(1.2); }
   .btn-start:active { transform: scale(0.97); animation: none; }
 
   @keyframes splashFadeUp {
@@ -266,7 +280,7 @@
 
   /* ── CHARACTER CREATION ── */
   #charCreate {
-    background: url('assets/images/02_character_select.png') center/cover no-repeat;
+    background: url('assets/images/02_char_create_bg.jpg') center/cover no-repeat;
     padding: 32px 16px 48px;
     z-index: 10;
     align-items: center;
@@ -2545,9 +2559,9 @@ const MENTOR_QUOTES = [
 ];
 
 const MODAL_BACKGROUNDS = {
-  record: "assets/images/03_recording_studio.png",
-  venue:  "assets/images/04_concert_venue.png",
-  levelUp: "assets/images/06_levelup_popup.png"
+  record: "assets/images/03_recording_studio.jpg",
+  venue:  "assets/images/04_concert_venue.jpg",
+  levelUp: "assets/images/06_levelup_popup.jpg"
 };
 
 function showMentor() {
