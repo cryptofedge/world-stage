@@ -130,6 +130,13 @@
     text-align: center;
     animation: splashFadeUp 1s ease 0.55s both;
   }
+  .splash-mark {
+    width: clamp(72px, 20vw, 96px);
+    height: clamp(72px, 20vw, 96px);
+    margin-bottom: clamp(12px, 3vh, 24px);
+    animation: splashFadeUp 1s ease 0s both;
+    filter: drop-shadow(0 4px 18px rgba(0,0,0,0.55));
+  }
   .btn-start {
     margin-top: clamp(20px, 5vh, 48px);
     padding: clamp(12px, 3vh, 18px) clamp(32px, 10vw, 52px);
@@ -1383,10 +1390,56 @@
   <div class="note" style="left:85%;top:85%;animation-delay:1.5s">♬</div>
   <div class="note" style="left:45%;top:85%;animation-delay:2s">♪</div>
   <div class="note" style="left:60%;top:78%;animation-delay:0.8s">♫</div>
-  <div class="splash-logo">WORLD STAGE</div>
-  <div class="splash-sub">Music Industry RPG</div>
-  <div class="splash-tagline">Learn the industry. Own your career.</div>
-  <button class="btn-start" onclick="showScreen('charCreate')">BEGIN YOUR JOURNEY</button>
+  <div class="splash-inner">
+    <!-- Brand mark: orange oval + Saturn ring + feather/quill -->
+    <svg class="splash-mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <defs>
+        <!-- Mask: show only OUTSIDE the oval (for back ring segment) -->
+        <mask id="mRingBack">
+          <rect width="100" height="100" fill="white"/>
+          <ellipse cx="50" cy="50" rx="37" ry="46" fill="black"/>
+        </mask>
+        <!-- Mask: show only BELOW y=56 (for front ring segment) -->
+        <mask id="mRingFront">
+          <rect x="-200" y="56" width="500" height="200" fill="white"/>
+        </mask>
+      </defs>
+
+      <!-- Ring — back half (outside oval, fades behind) -->
+      <ellipse cx="50" cy="54" rx="58" ry="11.5"
+        fill="none" stroke="rgba(255,255,255,0.38)" stroke-width="2.6"
+        transform="rotate(-13 50 54)" mask="url(#mRingBack)"/>
+
+      <!-- Orange oval body -->
+      <ellipse cx="50" cy="50" rx="37" ry="46" fill="#F47820"/>
+
+      <!-- White feather / quill-pen mark -->
+      <path fill="white" fill-rule="evenodd" d="
+        M 50 17
+        C 40 14 30 22 31 34
+        C 32 44 39 48 39 56
+        C 39 63 33 67 35 76
+        C 37 84 44 90 52 89
+        C 60 88 67 81 66 73
+        C 65 65 59 62 59 54
+        C 59 46 66 42 64 32
+        C 62 22 56 15 50 17 Z
+        M 50 20
+        C 48 27 48 35 50 41
+        C 52 35 52 27 50 20 Z
+      "/>
+
+      <!-- Ring — front half (over lower oval) -->
+      <ellipse cx="50" cy="54" rx="58" ry="11.5"
+        fill="none" stroke="rgba(255,255,255,0.88)" stroke-width="2.6"
+        transform="rotate(-13 50 54)" mask="url(#mRingFront)"/>
+    </svg>
+
+    <div class="splash-logo">WORLD STAGE</div>
+    <div class="splash-sub">Music Industry RPG</div>
+    <div class="splash-tagline">Learn the industry. Own your career.</div>
+    <button class="btn-start" onclick="showScreen('charCreate')">BEGIN YOUR JOURNEY</button>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════════
