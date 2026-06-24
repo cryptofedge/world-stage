@@ -1740,17 +1740,21 @@
           <div class="card-desc">A good manager opens doors — but they take 15–20%. Know your deal before you sign.</div>
           <div class="card-reward">+500 Followers · +$600 · +70 XP</div>
         </div>
+        <div class="game-card" onclick="launchSocialHustle()" style="border-color:rgba(68,136,255,.4);background:linear-gradient(135deg,rgba(68,136,255,.08),var(--card));">
+          <div class="card-icon">📲</div>
+          <div class="card-badge" style="background:var(--blue);color:#fff;">2D GAME</div>
+          <div class="card-title">Social Hustle</div>
+          <div class="card-desc">Swipe collabs and viral posts — dodge beef and fake deals. Phaser 2D arcade mini-game.</div>
+          <div class="card-reward">Earn Followers · Streams · Cred</div>
+        </div>
       </div>
     </div>
 
     <!-- ── MAP PANEL ── -->
     <div class="panel" id="panel-map">
       <div class="panel-title">WORLD MAP</div>
-      <div class="panel-sub">3 regions available now. 6 coming soon. Build your global reach.</div>
-      <div class="panel-hero">
-        <img src="assets/images/banner_worldmap.jpg" alt="World Map">
-        <div class="panel-hero-label">🌍 SELECT YOUR NEXT CITY</div>
-      </div>
+      <div class="panel-sub">Tap a city to travel. Build your global reach.</div>
+      <canvas id="three-world-map" style="display:block;width:100%;height:220px;border-radius:16px;margin-bottom:14px;cursor:pointer;"></canvas>
       <div class="map-container">
         <div class="map-title">SELECT A REGION TO TRAVEL</div>
         <div class="regions-list">
@@ -3257,6 +3261,327 @@ window.bookVenue = function(name, fee, req) {
   document.getElementById('modalOverlay').classList.add('open');
   if (G.actionCount % 3 === 0) setTimeout(triggerRandomEvent, 900);
 };
+
+// ═══════════════════════════════════════════════
+// THREE.JS 3D WORLD MAP
+// ═══════════════════════════════════════════════
+
+function init3DWorldMap() {
+  const canvas = document.getElementById('three-world-map');
+  if (!canvas || !window.THREE || canvas._initialized) return;
+  canvas._initialized = true;
+
+  const W = canvas.offsetWidth || 350, H = 220;
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setSize(W, H);
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setClearColor(0x08080f, 1);
+
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x08080f, 0.022);
+
+  const cam = new THREE.PerspectiveCamera(52, W / H, 0.1, 100);
+  cam.position.set(0, 11, 9);
+  cam.lookAt(0, 0, 0);
+
+  // Ground grid
+  scene.add(new THREE.GridHelper(22, 22, 0x1a1a2e, 0x111122));
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(22, 16),
+    new THREE.MeshPhongMaterial({ color: 0x07070e }));
+  ground.rotation.x = -Math.PI / 2; ground.position.y = -0.05;
+  scene.add(ground);
+
+  // Stars
+  const sp = new Float32Array(360);
+  for (let i = 0; i < 360; i += 3) { sp[i] = (Math.random()-.5)*40; sp[i+1] = Math.random()*12+4; sp[i+2] = -Math.random()*25-3; }
+  const sg = new THREE.BufferGeometry(); sg.setAttribute('position', new THREE.BufferAttribute(sp, 3));
+  scene.add(new THREE.Points(sg, new THREE.PointsMaterial({ color: 0xffffff, size: 0.12, transparent: true, opacity: 0.65 })));
+
+  // City definitions [name, region, x, z, hex color, tower height]
+  const CITIES = [
+    { name:'ATLANTA',       region:'atlanta',       x:-4,   z: 1,   col:0xff6b35, h:4.2 },
+    { name:'NASHVILLE',     region:'nashville',     x:-4,   z:-2.5, col:0xc8a96e, h:3.0 },
+    { name:'SANTO DOMINGO', region:'santo_domingo', x: 3.5, z: 1.5, col:0x00c853, h:3.4 },
+    { name:'QUITO',         region:'quito',         x: 0.5, z: 3.2, col:0xffda00, h:2.6 },
+    { name:'GUAYAQUIL',     region:'guayaquil',     x: 1.5, z: 5.0, col:0xffda00, h:2.1 },
+  ];
+
+  const towers = [];
+  CITIES.forEach(c => {
+    // Main tower
+    const tower = new THREE.Mesh(
+      new THREE.BoxGeometry(0.75, c.h, 0.75),
+      new THREE.MeshPhongMaterial({ color: c.col, emissive: c.col, emissiveIntensity: 0.18, shininess: 50 })
+    );
+    tower.position.set(c.x, c.h / 2, c.z);
+    tower.userData.region = c.region;
+    scene.add(tower);
+    towers.push(tower);
+
+    // Surrounding mini-buildings
+    for (let i = 0; i < 5; i++) {
+      const sh = 0.4 + Math.random() * c.h * 0.55;
+      const mb = new THREE.Mesh(
+        new THREE.BoxGeometry(0.35 + Math.random()*0.2, sh, 0.35 + Math.random()*0.2),
+        new THREE.MeshPhongMaterial({ color: 0x111128, emissive: 0x080814 })
+      );
+      const ang = (i / 5) * Math.PI * 2;
+      mb.position.set(c.x + Math.cos(ang) * 0.9, sh / 2, c.z + Math.sin(ang) * 0.9);
+      scene.add(mb);
+
+      // Window lights on mini-buildings
+      if (Math.random() > 0.4) {
+        const wm = new THREE.Mesh(new THREE.PlaneGeometry(0.15, 0.15),
+          new THREE.MeshBasicMaterial({ color: c.col, transparent: true, opacity: 0.5 }));
+        wm.position.set(c.x + Math.cos(ang) * 0.9 + Math.cos(ang)*0.18, sh * 0.6, c.z + Math.sin(ang) * 0.9 + Math.sin(ang)*0.18);
+        wm.lookAt(c.x, sh * 0.6, c.z);
+        scene.add(wm);
+      }
+    }
+
+    // Beacon on top
+    const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.15, 8, 8),
+      new THREE.MeshBasicMaterial({ color: c.col }));
+    beacon.position.set(c.x, c.h + 0.2, c.z);
+    scene.add(beacon);
+    tower.userData.beacon = beacon;
+
+    // Point light per city
+    const pl = new THREE.PointLight(c.col, 2.5, 5);
+    pl.position.set(c.x, c.h + 0.5, c.z);
+    scene.add(pl);
+
+    // Connection line to ground
+    const linePts = [new THREE.Vector3(c.x, 0, c.z), new THREE.Vector3(c.x, -0.05, c.z)];
+    const lineGeo = new THREE.BufferGeometry().setFromPoints(linePts);
+    scene.add(new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: c.col, transparent: true, opacity: 0.4 })));
+  });
+
+  // Lights
+  scene.add(new THREE.AmbientLight(0x112233, 0.9));
+  const sun = new THREE.DirectionalLight(0x334466, 0.6);
+  sun.position.set(6, 12, 4); scene.add(sun);
+
+  // Raycaster — click to travel
+  const ray = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  canvas.addEventListener('click', e => {
+    const r = canvas.getBoundingClientRect();
+    mouse.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+    mouse.y = -((e.clientY - r.top) / r.height) * 2 + 1;
+    ray.setFromCamera(mouse, cam);
+    const hits = ray.intersectObjects(towers);
+    if (hits.length) travelTo(hits[0].object.userData.region);
+  });
+  canvas.addEventListener('mousemove', e => {
+    const r = canvas.getBoundingClientRect();
+    mouse.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+    mouse.y = -((e.clientY - r.top) / r.height) * 2 + 1;
+    ray.setFromCamera(mouse, cam);
+    canvas.style.cursor = ray.intersectObjects(towers).length ? 'pointer' : 'default';
+  });
+
+  // Resize
+  window.addEventListener('resize', () => {
+    const W2 = canvas.offsetWidth || 350;
+    renderer.setSize(W2, H);
+    cam.aspect = W2 / H;
+    cam.updateProjectionMatrix();
+  });
+
+  // Animate
+  let t = 0;
+  function animateMap() {
+    requestAnimationFrame(animateMap);
+    t += 0.004;
+    cam.position.x = Math.sin(t * 0.35) * 3.5;
+    cam.position.z = 9 + Math.cos(t * 0.25) * 1.5;
+    cam.lookAt(0, 0, 0);
+    towers.forEach((tw, i) => {
+      tw.material.emissiveIntensity = 0.14 + Math.sin(t * 2.5 + i * 1.3) * 0.1;
+      if (tw.userData.beacon) {
+        tw.userData.beacon.scale.setScalar(1 + Math.sin(t * 3 + i) * 0.25);
+      }
+    });
+    renderer.render(scene, cam);
+  }
+  animateMap();
+}
+
+// Hook into showPanel so the map initializes when visited
+const _origShowPanel = window.showPanel;
+window.showPanel = function(id) {
+  if (typeof _origShowPanel === 'function') _origShowPanel(id);
+  if (id === 'map') setTimeout(init3DWorldMap, 60);
+};
+
+// ═══════════════════════════════════════════════
+// PHASER SOCIAL HUSTLE MINI-GAME
+// ═══════════════════════════════════════════════
+
+class SocialHustleScene extends Phaser.Scene {
+  constructor() { super('hustle'); }
+
+  create() {
+    const W = this.scale.width, H = this.scale.height;
+    this.score = 0; this.followers = 0; this.streams = 0; this.cred = 0;
+    this.timeLeft = 20; this.active = true; this.posts = [];
+
+    // Background
+    const bg = this.add.graphics();
+    bg.fillGradientStyle(0x0a0a0f, 0x0a0a0f, 0x0a1a2e, 0x0a1a2e, 1);
+    bg.fillRect(0, 0, W, H);
+
+    // Scanlines
+    for (let y = 0; y < H; y += 8) {
+      const l = this.add.graphics(); l.lineStyle(1, 0x000000, 0.08); l.lineBetween(0, y, W, y);
+    }
+
+    // Title
+    this.add.text(W/2, 32, '📲 SOCIAL HUSTLE', { fontSize:'20px', fontFamily:'Arial Black,Arial', color:'#4488ff', letterSpacing:3 }).setOrigin(0.5);
+    this.timerTxt = this.add.text(W - 16, 32, '20s', { fontSize:'15px', fontFamily:'monospace', color:'#6b6b8a' }).setOrigin(1, 0.5);
+    this.scoreTxt = this.add.text(16, 32, '👥 0', { fontSize:'14px', fontFamily:'monospace', color:'#00ff88' }).setOrigin(0, 0.5);
+
+    // 3 lanes
+    const LANES = [H * 0.3, H * 0.55, H * 0.78];
+    const LANE_COLORS = [0x4488ff, 0x8844ff, 0xff6b35];
+    LANES.forEach((y, i) => {
+      const g = this.add.graphics();
+      g.lineStyle(1, LANE_COLORS[i], 0.15);
+      g.lineBetween(0, y, W, y);
+      g.lineBetween(0, y + 52, W, y + 52);
+    });
+
+    // Post types
+    this.POST_TYPES = [
+      { emoji:'🤝', label:'COLLAB REQUEST', color:0x00ff88, good:true,  fw:1500, st:0,    cr:2, txt:'#00ff88' },
+      { emoji:'🔥', label:'VIRAL CLIP',      color:0x4488ff, good:true,  fw:500,  st:8000, cr:0, txt:'#4488ff' },
+      { emoji:'📰', label:'PRESS FEATURE',   color:0xFFD700, good:true,  fw:800,  st:2000, cr:5, txt:'#FFD700' },
+      { emoji:'💰', label:'BRAND DEAL',      color:0xff6b35, good:true,  fw:300,  st:0,    cr:3, txt:'#ff6b35' },
+      { emoji:'❌', label:'DISS TRACK',      color:0xff4466, good:false, fw:0,    st:0,    cr:0, txt:'#ff4466' },
+      { emoji:'🚨', label:'FAKE DEAL',       color:0xff9944, good:false, fw:0,    st:0,    cr:0, txt:'#ff9944' },
+      { emoji:'💀', label:'LABEL BEEF',      color:0x8844ff, good:false, fw:0,    st:0,    cr:0, txt:'#8844ff' },
+    ];
+
+    // Spawn posts on timer
+    this.time.addEvent({ delay: 900, loop: true, callback: this.spawnPost, callbackScope: this });
+
+    // Countdown
+    this.time.addEvent({
+      delay: 1000, loop: true, callback: () => {
+        if (!this.active) return;
+        this.timeLeft--;
+        this.timerTxt.setText(this.timeLeft + 's');
+        if (this.timeLeft <= 3) this.timerTxt.setColor('#ff4466');
+        if (this.timeLeft <= 0) this.endGame();
+      }
+    });
+
+    // Hint
+    this.add.text(W/2, H - 22, 'TAP GREEN POSTS · AVOID RED', { fontSize:'10px', fontFamily:'Arial,sans-serif', color:'#2a2a3e' }).setOrigin(0.5);
+  }
+
+  spawnPost() {
+    if (!this.active) return;
+    const W = this.scale.width, H = this.scale.height;
+    const LANES = [H * 0.3, H * 0.55, H * 0.78];
+    const lane = Phaser.Math.Between(0, 2);
+    const pt = Phaser.Utils.Array.GetRandom(this.POST_TYPES);
+    const y = LANES[lane] + 26;
+
+    const card = this.add.graphics();
+    card.fillStyle(pt.color, 0.12);
+    card.fillRoundedRect(-80, -22, 160, 44, 8);
+    card.lineStyle(1.5, pt.color, 0.85);
+    card.strokeRoundedRect(-80, -22, 160, 44, 8);
+    card.x = W + 90; card.y = y;
+
+    const em = this.add.text(W + 90 - 52, y, pt.emoji, { fontSize:'20px' }).setOrigin(0.5);
+    const lb = this.add.text(W + 90 + 4, y - 7, pt.label, { fontSize:'11px', color: pt.txt, fontFamily:'Arial Black,Arial', fontStyle:'bold' }).setOrigin(0, 0.5);
+    const act = pt.good
+      ? this.add.text(W + 90 + 4, y + 8, '✓ TAP!', { fontSize:'9px', color:'#00ff88', fontFamily:'monospace' }).setOrigin(0, 0.5)
+      : this.add.text(W + 90 + 4, y + 8, '✗ AVOID', { fontSize:'9px', color:'#ff4466', fontFamily:'monospace' }).setOrigin(0, 0.5);
+
+    const post = { card, em, lb, act, pt, done: false };
+    card.setInteractive(new Phaser.Geom.Rectangle(-80, -22, 160, 44), Phaser.Geom.Rectangle.Contains);
+    card.on('pointerdown', () => this.tapPost(post));
+    em.setInteractive(new Phaser.Geom.Rectangle(-14, -14, 28, 28), Phaser.Geom.Rectangle.Contains);
+    em.on('pointerdown', () => this.tapPost(post));
+    lb.setInteractive(new Phaser.Geom.Rectangle(0, -10, 120, 20), Phaser.Geom.Rectangle.Contains);
+    lb.on('pointerdown', () => this.tapPost(post));
+
+    this.posts.push(post);
+  }
+
+  tapPost(post) {
+    if (!this.active || post.done) return;
+    post.done = true;
+    if (post.pt.good) {
+      this.followers += post.pt.fw;
+      this.streams  += post.pt.st;
+      this.cred     += post.pt.cr;
+      this.score++;
+      this.scoreTxt.setText('👥 ' + (this.followers / 1000).toFixed(1) + 'K');
+      post.card.setFillStyle(0x00ff88, 0.25);
+      const pop = this.add.text(post.card.x, post.card.y - 30,
+        post.pt.fw ? `+${(post.pt.fw/1000).toFixed(1)}K fans` : `+${(post.pt.st/1000).toFixed(0)}K streams`,
+        { fontSize:'14px', color:'#00ff88', fontFamily:'Arial Black,Arial' }).setOrigin(0.5).setDepth(10);
+      this.tweens.add({ targets: pop, y: pop.y - 50, alpha: 0, duration: 600, onComplete: () => pop.destroy() });
+    } else {
+      this.score = Math.max(0, this.score - 1);
+      post.card.setFillStyle(0xff4466, 0.25);
+      const pop = this.add.text(post.card.x, post.card.y - 20, '💀 BAD MOVE', { fontSize:'13px', color:'#ff4466', fontFamily:'Arial Black,Arial' }).setOrigin(0.5).setDepth(10);
+      this.tweens.add({ targets: pop, y: pop.y - 40, alpha: 0, duration: 500, onComplete: () => pop.destroy() });
+      this.followers = Math.max(0, this.followers - 500);
+    }
+    this.tweens.add({ targets: [post.card, post.em, post.lb, post.act], alpha: 0, duration: 350,
+      onComplete: () => { post.card.destroy(); post.em.destroy(); post.lb.destroy(); post.act.destroy(); }
+    });
+  }
+
+  update() {
+    if (!this.active) return;
+    const spd = 2.8 + (20 - this.timeLeft) * 0.15;
+    this.posts.forEach(p => {
+      if (p.done) return;
+      p.card.x -= spd; p.em.x -= spd; p.lb.x -= spd; p.act.x -= spd;
+      if (p.card.x < -100) {
+        p.done = true;
+        p.card.destroy(); p.em.destroy(); p.lb.destroy(); p.act.destroy();
+      }
+    });
+    this.posts = this.posts.filter(p => !p.done);
+  }
+
+  endGame() {
+    if (!this.active) return;
+    this.active = false;
+    const W = this.scale.width, H = this.scale.height;
+    this.add.rectangle(W/2, H/2, W, H, 0x000000, 0.8).setDepth(20);
+    this.add.text(W/2, H/2 - 105, 'HUSTLE COMPLETE', { fontSize:'24px', fontFamily:'Arial Black,Arial', color:'#4488ff', letterSpacing:3 }).setOrigin(0.5).setDepth(21);
+    this.add.text(W/2, H/2 - 62, `+${(this.followers/1000).toFixed(1)}K fans`, { fontSize:'28px', fontFamily:'Arial Black,Arial', color:'#00ff88' }).setOrigin(0.5).setDepth(21);
+    this.add.text(W/2, H/2 - 25, `+${(this.streams/1000).toFixed(0)}K streams  ·  +${this.cred} cred`, { fontSize:'14px', fontFamily:'monospace', color:'#9090b0' }).setOrigin(0.5).setDepth(21);
+    const btn = this.add.text(W/2, H/2 + 55, '[ COLLECT ]', { fontSize:'22px', fontFamily:'Arial Black,Arial', color:'#000', backgroundColor:'#4488ff', padding:{x:22,y:12} }).setOrigin(0.5).setDepth(21).setInteractive({ useHandCursor:true });
+    btn.on('pointerdown', () => _pClose({ followers: this.followers, streams: this.streams, cred: this.cred }));
+    btn.on('pointerover', () => btn.setStyle({ backgroundColor:'#2266cc' }));
+    btn.on('pointerout',  () => btn.setStyle({ backgroundColor:'#4488ff' }));
+  }
+}
+
+function launchSocialHustle() {
+  _pLaunch(SocialHustleScene, result => {
+    G.following   += result.followers;
+    G.streams     += result.streams;
+    G.streetCred  += result.cred;
+    G.day         += 1;
+    G.actionCount += 1;
+    addXP(80);
+    addToFeed(`📲 Ran a Social Hustle session — +${fmtNum(result.followers)} fans · +${fmtNum(result.streams)} streams`);
+    updateStats();
+    toast(`📲 Social Hustle done! +${fmtNum(result.followers)} followers · +${fmtNum(result.streams)} streams`, 'success');
+    if (G.actionCount % 3 === 0) setTimeout(triggerRandomEvent, 800);
+  });
+}
 
 // ═══════════════════════════════════════════════
 // THREE.JS 3D SCENES
