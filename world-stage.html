@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>World Stage — Music Industry RPG</title>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
 
@@ -1457,6 +1458,7 @@
 <body>
 
 <canvas id="particles"></canvas>
+<div id="phaserWrap" style="display:none;position:fixed;inset:0;z-index:9999;background:#0a0a0f;"></div>
 <div class="toast-container" id="toastContainer"></div>
 
 <!-- ═══════════════════════════════════════════════
@@ -1658,7 +1660,10 @@
           <div class="rival-name" id="rivalName">DRIZZYGHOST</div>
           <div id="rivalTaunt" style="font-size:11px">"You ain't ready for this level."</div>
         </div>
-        <div style="margin-left:auto;font-size:10px;color:var(--red);font-family:'Space Mono',monospace" id="rivalStats"></div>
+        <div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+          <div style="font-size:10px;color:var(--red);font-family:'Space Mono',monospace" id="rivalStats"></div>
+          <button onclick="launchBeatBattle()" style="font-size:10px;font-family:'Bebas Neue',sans-serif;letter-spacing:1px;background:var(--red);color:#fff;border:none;border-radius:4px;padding:3px 8px;cursor:pointer;">⚔️ BATTLE</button>
+        </div>
       </div>
 
       <!-- NPC Row -->
@@ -3249,6 +3254,490 @@ window.bookVenue = function(name, fee, req) {
   document.getElementById('modalOverlay').classList.add('open');
   if (G.actionCount % 3 === 0) setTimeout(triggerRandomEvent, 900);
 };
+
+// ═══════════════════════════════════════════════
+// PHASER 3 MINI-GAMES
+// ═══════════════════════════════════════════════
+
+let _pGame = null;
+
+function _pClose(result) {
+  document.getElementById('phaserWrap').style.display = 'none';
+  if (_pGame) { _pGame.destroy(true); _pGame = null; }
+  if (window._pCb) { window._pCb(result); window._pCb = null; }
+}
+
+function _pLaunch(SceneClass, cb) {
+  const wrap = document.getElementById('phaserWrap');
+  wrap.style.display = 'block';
+  if (_pGame) { _pGame.destroy(true); _pGame = null; }
+  window._pCb = cb;
+  _pGame = new Phaser.Game({
+    type: Phaser.CANVAS,
+    width: window.innerWidth,
+    height: window.innerHeight,
+    parent: 'phaserWrap',
+    backgroundColor: '#0a0a0f',
+    scene: [SceneClass],
+    scale: { mode: Phaser.Scale.RESIZE }
+  });
+}
+
+// ── STUDIO SCENE ──────────────────────────────
+class StudioScene extends Phaser.Scene {
+  constructor() { super('studio'); }
+
+  preload() {
+    const g = this.make.graphics({ x:0, y:0, add:false });
+    g.fillStyle(0xffffff); g.fillRect(0,0,6,6);
+    g.generateTexture('dot',6,6); g.destroy();
+  }
+
+  create() {
+    const W = this.scale.width, H = this.scale.height;
+    this.hits = 0; this.misses = 0; this.combo = 0; this.maxCombo = 0;
+    this.notes = []; this.timeLeft = 20; this.active = true; this.speed = 4;
+
+    const bg = this.add.graphics();
+    bg.fillGradientStyle(0x0a0a0f,0x0a0a0f,0x1a1a2e,0x1a1a2e,1);
+    bg.fillRect(0,0,W,H);
+
+    // Scanlines
+    for (let y = 0; y < H; y += 6) {
+      const l = this.add.graphics();
+      l.lineStyle(1, 0x000000, 0.12);
+      l.lineBetween(0, y, W, y);
+    }
+
+    this.add.text(W/2, 38, 'STUDIO SESSION', {
+      fontSize:'22px', fontFamily:'Arial Black,Arial', color:'#FFD700', letterSpacing:4
+    }).setOrigin(0.5);
+
+    this.timerTxt = this.add.text(W/2, 66, '20s', {
+      fontSize:'15px', fontFamily:'monospace', color:'#6b6b8a'
+    }).setOrigin(0.5);
+
+    this.laneColors = [0xFFD700, 0x4488ff, 0x8844ff, 0x00ff88];
+    const laneW = W / 4;
+    this.laneX = [0,1,2,3].map(i => laneW*i + laneW/2);
+    this.hitY = H - 100;
+
+    // Lane dividers
+    this.laneX.forEach((x,i) => {
+      const g = this.add.graphics();
+      g.lineStyle(1, this.laneColors[i], 0.12);
+      g.lineBetween(x, 85, x, H-120);
+    });
+
+    // Hit zones
+    this.zones = this.laneX.map((x,i) => {
+      const z = this.add.circle(x, this.hitY, 30, this.laneColors[i], 0.25);
+      z.setInteractive();
+      z.on('pointerdown', () => this.tapLane(i));
+      // ring
+      const ring = this.add.graphics();
+      ring.lineStyle(2, this.laneColors[i], 0.5);
+      ring.strokeCircle(x, this.hitY, 30);
+      return z;
+    });
+
+    // Key labels below zones
+    ['A','S','K','L'].forEach((k,i) => {
+      this.add.text(this.laneX[i], this.hitY + 42, k, {
+        fontSize:'12px', fontFamily:'monospace', color:'#454565'
+      }).setOrigin(0.5);
+    });
+
+    this.scoreTxt = this.add.text(W/2, H-55, 'HIT: 0   MISS: 0   COMBO: ×1', {
+      fontSize:'12px', fontFamily:'monospace', color:'#6b6b8a'
+    }).setOrigin(0.5);
+
+    this.add.text(W/2, H-30, 'TAP LANES · KEYS A S K L', {
+      fontSize:'10px', fontFamily:'Arial,sans-serif', color:'#2a2a3e'
+    }).setOrigin(0.5);
+
+    this.keys = ['A','S','K','L'].map(k => this.input.keyboard.addKey(k));
+
+    this.time.addEvent({ delay:600, loop:true, callback:this.spawnNote, callbackScope:this });
+    this.time.addEvent({
+      delay:1000, loop:true, callback:() => {
+        if (!this.active) return;
+        this.timeLeft--;
+        this.timerTxt.setText(this.timeLeft+'s');
+        if (this.timeLeft <= 3) this.timerTxt.setColor('#ff4466');
+        if (this.timeLeft <= 0) this.endGame();
+      }
+    });
+    this.time.addEvent({
+      delay:5000, loop:true,
+      callback:() => { this.speed = Math.min(this.speed+0.8, 9); }
+    });
+  }
+
+  spawnNote() {
+    if (!this.active) return;
+    const lane = Phaser.Math.Between(0,3);
+    const n = this.add.circle(this.laneX[lane], 85, 20, this.laneColors[lane]);
+    n.lane = lane;
+    // inner dot
+    this.add.circle(this.laneX[lane], 85, 6, 0xffffff, 0.4).setDepth(1);
+    n.setDepth(2);
+    this.notes.push(n);
+  }
+
+  tapLane(lane) {
+    if (!this.active) return;
+    const hit = this.notes.find(n => n.lane===lane && Math.abs(n.y-this.hitY)<65);
+    if (hit) {
+      this.hits++; this.combo++; this.maxCombo = Math.max(this.maxCombo, this.combo);
+      this.zones[lane].setFillStyle(this.laneColors[lane], 0.9);
+      this.time.delayedCall(130, () => this.zones[lane].setFillStyle(this.laneColors[lane], 0.25));
+      const label = this.combo>8?'FIRE 🔥':this.combo>4?'NICE!':'HIT';
+      const pop = this.add.text(hit.x, hit.y, label, {
+        fontSize:'14px', fontFamily:'Arial Black,Arial', color:'#FFD700'
+      }).setOrigin(0.5).setDepth(10);
+      this.tweens.add({ targets:pop, y:hit.y-55, alpha:0, duration:500, onComplete:()=>pop.destroy() });
+      hit.destroy(); this.notes = this.notes.filter(n=>n!==hit);
+    } else {
+      this.combo = 0;
+      this.zones[lane].setFillStyle(0xff4466, 0.5);
+      this.time.delayedCall(130, () => this.zones[lane].setFillStyle(this.laneColors[lane], 0.25));
+    }
+    this.updateScore();
+  }
+
+  update() {
+    if (!this.active) return;
+    this.keys.forEach((k,i) => { if (Phaser.Input.Keyboard.JustDown(k)) this.tapLane(i); });
+    this.notes.forEach(n => { n.y += this.speed; });
+    const missed = this.notes.filter(n => n.y > this.hitY+70);
+    missed.forEach(n => { this.misses++; this.combo=0; n.destroy(); });
+    if (missed.length) this.updateScore();
+    this.notes = this.notes.filter(n => n.y <= this.hitY+70);
+  }
+
+  updateScore() {
+    this.scoreTxt.setText(`HIT: ${this.hits}   MISS: ${this.misses}   COMBO: ×${this.combo}`);
+  }
+
+  endGame() {
+    if (!this.active) return;
+    this.active = false;
+    const W=this.scale.width, H=this.scale.height;
+    const total = this.hits+this.misses;
+    const pct = total>0 ? this.hits/total : 0;
+    const grade = pct>=0.9?'S':pct>=0.75?'A':pct>=0.6?'B':pct>=0.4?'C':'D';
+    const gColor = pct>=0.9?'#FFD700':pct>=0.75?'#00ff88':pct>=0.6?'#4488ff':pct>=0.4?'#FFA500':'#ff4466';
+    this.add.rectangle(W/2,H/2,W,H,0x000000,0.75).setDepth(20);
+    this.add.text(W/2,H/2-110,'SESSION COMPLETE',{fontSize:'24px',fontFamily:'Arial Black,Arial',color:'#FFD700',letterSpacing:3}).setOrigin(0.5).setDepth(21);
+    this.add.text(W/2,H/2-45,grade,{fontSize:'90px',fontFamily:'Arial Black,Arial',color:gColor}).setOrigin(0.5).setDepth(21);
+    this.add.text(W/2,H/2+55,`${this.hits} HITS · ${this.misses} MISSES · MAX COMBO ×${this.maxCombo}`,{fontSize:'13px',fontFamily:'monospace',color:'#9090b0'}).setOrigin(0.5).setDepth(21);
+    const mult = grade==='S'?3:grade==='A'?2:grade==='B'?1.5:1;
+    this.add.text(W/2,H/2+85,`${mult}× STREAM MULTIPLIER`,{fontSize:'16px',fontFamily:'Arial Black,Arial',color:'#FFD700',letterSpacing:2}).setOrigin(0.5).setDepth(21);
+    const btn = this.add.text(W/2,H/2+140,'[ DROP THE TRACK ]',{fontSize:'20px',fontFamily:'Arial Black,Arial',color:'#0a0a0f',backgroundColor:'#FFD700',padding:{x:22,y:12}}).setOrigin(0.5).setDepth(21).setInteractive({useHandCursor:true});
+    btn.on('pointerdown',()=>_pClose({pct,grade,hits:this.hits,combo:this.maxCombo,mult}));
+    btn.on('pointerover',()=>btn.setStyle({backgroundColor:'#FFA500'}));
+    btn.on('pointerout',()=>btn.setStyle({backgroundColor:'#FFD700'}));
+  }
+}
+
+// ── CONCERT SCENE ─────────────────────────────
+class ConcertScene extends Phaser.Scene {
+  constructor() { super('concert'); }
+
+  preload() {
+    const g = this.make.graphics({x:0,y:0,add:false});
+    g.fillStyle(0xffffff); g.fillRect(0,0,6,6);
+    g.generateTexture('dot',6,6); g.destroy();
+  }
+
+  create() {
+    const W=this.scale.width, H=this.scale.height;
+    this.energy=0; this.active=true; this.timeLeft=15;
+
+    const bg=this.add.graphics();
+    bg.fillGradientStyle(0x0a0a0f,0x0a0a0f,0x1a0a2e,0x2e0a1a,1);
+    bg.fillRect(0,0,W,H);
+
+    // Stage floor
+    const stage=this.add.graphics();
+    stage.fillStyle(0x1a1a2e,1); stage.fillRect(0,H*0.55,W,H*0.1);
+    stage.fillStyle(0x2a2a3e,1); stage.fillRect(W*0.1,H*0.5,W*0.8,H*0.06);
+
+    // Spotlights
+    [W*0.2,W*0.5,W*0.8].forEach((x,i)=>{
+      const g=this.add.graphics();
+      g.fillStyle(0xFFD700,0.05); g.fillTriangle(x,0,x-70,H*0.55,x+70,H*0.55);
+      this.tweens.add({targets:g,angle:Phaser.Math.Between(-12,12),duration:1400+i*350,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});
+    });
+
+    // Crowd
+    this.crowd=[];
+    for (let i=0;i<55;i++) {
+      const x=Phaser.Math.Between(10,W-10);
+      const y=Phaser.Math.Between(H*0.63,H*0.93);
+      const c=this.add.circle(x,y,Phaser.Math.Between(5,11),
+        Phaser.Utils.Array.GetRandom([0xFFD700,0x4488ff,0xff4466,0x00ff88,0xffffff]),0.85);
+      this.tweens.add({targets:c,y:y-Phaser.Math.Between(12,28),duration:280+Math.random()*420,yoyo:true,repeat:-1,ease:'Sine.easeInOut',delay:Math.random()*500});
+      this.crowd.push(c);
+    }
+
+    // Performer
+    this.char=this.add.text(W/2,H*0.47,'🎤',{fontSize:'42px'}).setOrigin(0.5);
+    this.tweens.add({targets:this.char,y:H*0.47-10,duration:380,yoyo:true,repeat:-1});
+
+    // Title + timer
+    this.add.text(W/2,35,'SHOW NIGHT',{fontSize:'28px',fontFamily:'Arial Black,Arial',color:'#FFD700',letterSpacing:5}).setOrigin(0.5);
+    this.timerTxt=this.add.text(W-16,35,'15s',{fontSize:'15px',fontFamily:'monospace',color:'#6b6b8a'}).setOrigin(1,0.5);
+
+    // Energy bar
+    const bW=W*0.7,bX=W/2,bY=80;
+    this.add.text(bX,bY-15,'CROWD ENERGY',{fontSize:'10px',fontFamily:'Arial,sans-serif',color:'#6b6b8a',letterSpacing:3}).setOrigin(0.5);
+    this.add.rectangle(bX,bY,bW,20,0x1e1e2e).setOrigin(0.5);
+    this.energyBar=this.add.rectangle(bX-bW/2,bY,0,20,0xFFD700).setOrigin(0,0.5);
+    this.add.rectangle(bX,bY,bW,20,0xffffff,0).setStrokeStyle(1,0x2a2a3e).setOrigin(0.5);
+    this._bW=bW;
+
+    // Hype button
+    const btn=this.add.text(W/2,H*0.38,'🎤  HYPE THE CROWD',{fontSize:'20px',fontFamily:'Arial Black,Arial',color:'#0a0a0f',backgroundColor:'#FFD700',padding:{x:26,y:14},letterSpacing:1}).setOrigin(0.5).setInteractive({useHandCursor:true});
+    btn.on('pointerdown',()=>this.hype(btn));
+    btn.on('pointerover',()=>btn.setStyle({backgroundColor:'#FFA500'}));
+    btn.on('pointerout',()=>btn.setStyle({backgroundColor:'#FFD700'}));
+    this.add.text(W/2,H*0.38+48,'TAP FAST!',{fontSize:'11px',fontFamily:'Arial,sans-serif',color:'#454565'}).setOrigin(0.5);
+
+    // Particle emitter for confetti
+    this.emitter=this.add.particles(0,0,'dot',{
+      speed:{min:150,max:350},angle:{min:230,max:310},
+      scale:{start:1.5,end:0},lifespan:900,quantity:5,
+      tint:[0xFFD700,0x4488ff,0xff4466,0x00ff88,0xffa500],
+      emitting:false
+    });
+
+    this.time.addEvent({
+      delay:1000,loop:true,callback:()=>{
+        if(!this.active)return;
+        this.timeLeft--;
+        this.timerTxt.setText(this.timeLeft+'s');
+        if(this.timeLeft<=3)this.timerTxt.setColor('#ff4466');
+        if(this.timeLeft<=0)this.endShow();
+      }
+    });
+  }
+
+  hype(btn) {
+    if (!this.active) return;
+    this.energy=Math.min(this.energy+6,100);
+    this.energyBar.width=this._bW*(this.energy/100);
+    const col=this.energy>=80?0x00ff88:this.energy>=50?0xFFD700:0x4488ff;
+    this.energyBar.setFillStyle(col);
+    this.crowd.forEach(c=>this.tweens.add({targets:c,scaleX:1.6,scaleY:1.6,duration:90,yoyo:true}));
+    this.tweens.add({targets:this.char,scaleX:1.3,scaleY:1.3,duration:100,yoyo:true});
+    this.tweens.add({targets:btn,scaleX:0.93,scaleY:0.93,duration:80,yoyo:true});
+    if (this.energy>40) {
+      this.emitter.setPosition(Phaser.Math.Between(60,this.scale.width-60),0);
+      this.emitter.emitting=true;
+      this.time.delayedCall(180,()=>{ this.emitter.emitting=false; });
+    }
+  }
+
+  endShow() {
+    if (!this.active) return;
+    this.active=false;
+    const W=this.scale.width,H=this.scale.height;
+    const mult=this.energy>=80?2.5:this.energy>=50?1.75:1;
+    const label=this.energy>=80?'SOLD OUT! 🔥':this.energy>=50?'GREAT SHOW! 🎤':'DECENT SET';
+    const col=this.energy>=80?'#00ff88':this.energy>=50?'#FFD700':'#9090b0';
+    this.add.rectangle(W/2,H/2,W,H,0x000000,0.78).setDepth(20);
+    this.add.text(W/2,H/2-100,label,{fontSize:'32px',fontFamily:'Arial Black,Arial',color:col,letterSpacing:2}).setOrigin(0.5).setDepth(21);
+    this.add.text(W/2,H/2-45,`CROWD ENERGY: ${this.energy}%`,{fontSize:'17px',fontFamily:'monospace',color:'#9090b0'}).setOrigin(0.5).setDepth(21);
+    this.add.text(W/2,H/2+10,`${mult}× EARNINGS MULTIPLIER`,{fontSize:'18px',fontFamily:'Arial Black,Arial',color:'#FFD700',letterSpacing:2}).setOrigin(0.5).setDepth(21);
+    const btn=this.add.text(W/2,H/2+90,'[ COLLECT EARNINGS ]',{fontSize:'20px',fontFamily:'Arial Black,Arial',color:'#0a0a0f',backgroundColor:'#FFD700',padding:{x:20,y:12}}).setOrigin(0.5).setDepth(21).setInteractive({useHandCursor:true});
+    btn.on('pointerdown',()=>_pClose({energy:this.energy,mult}));
+    btn.on('pointerover',()=>btn.setStyle({backgroundColor:'#FFA500'}));
+    btn.on('pointerout',()=>btn.setStyle({backgroundColor:'#FFD700'}));
+  }
+}
+
+// ── BEAT BATTLE SCENE ─────────────────────────
+class BeatScene extends Phaser.Scene {
+  constructor() { super('beat'); }
+
+  create() {
+    const W=this.scale.width,H=this.scale.height;
+    this.myScore=0; this.rivalScore=0; this.active=true; this.timeLeft=30;
+    this.myNotes=[]; this.rivalNotes=[];
+    const laneColors=[0xFFD700,0x4488ff,0x00ff88];
+
+    const bg=this.add.graphics();
+    bg.fillGradientStyle(0x0a0a0f,0x0a0a0f,0x1a0a0f,0x0f0a1a,1);
+    bg.fillRect(0,0,W,H);
+
+    // Divider
+    const dv=this.add.graphics();
+    dv.lineStyle(2,0x2a2a3e,1); dv.lineBetween(W/2,80,W/2,H-60);
+
+    // Labels
+    this.add.text(W*0.25,38,G.name||'YOU',{fontSize:'17px',fontFamily:'Arial Black,Arial',color:'#FFD700',letterSpacing:2}).setOrigin(0.5);
+    this.add.text(W*0.75,38,'DRIZZYGHOST',{fontSize:'14px',fontFamily:'Arial Black,Arial',color:'#ff4466',letterSpacing:1}).setOrigin(0.5);
+
+    this.myScoreTxt=this.add.text(W*0.25,65,'0',{fontSize:'26px',fontFamily:'monospace',color:'#FFD700'}).setOrigin(0.5);
+    this.rivalScoreTxt=this.add.text(W*0.75,65,'0',{fontSize:'26px',fontFamily:'monospace',color:'#ff4466'}).setOrigin(0.5);
+    this.timerTxt=this.add.text(W/2,55,'30',{fontSize:'20px',fontFamily:'Arial Black,Arial',color:'#454565'}).setOrigin(0.5);
+
+    this.hitY=H-90;
+    const myX=[W*0.09,W*0.25,W*0.41];
+    const rvX=[W*0.59,W*0.75,W*0.91];
+
+    this.myZones=myX.map((x,i)=>{
+      const z=this.add.circle(x,this.hitY,24,laneColors[i],0.3).setInteractive();
+      z.on('pointerdown',()=>this.myTap(i));
+      const ring=this.add.graphics(); ring.lineStyle(2,laneColors[i],0.5); ring.strokeCircle(x,this.hitY,24);
+      return z;
+    });
+    this.rivalZones=rvX.map((x,i)=>this.add.circle(x,this.hitY,24,laneColors[i],0.15));
+
+    ['Z','X','C'].forEach((k,i)=>{
+      this.add.text(myX[i],this.hitY+36,k,{fontSize:'11px',fontFamily:'monospace',color:'#2a2a3e'}).setOrigin(0.5);
+    });
+
+    this.myKeys=['Z','X','C'].map(k=>this.input.keyboard.addKey(k));
+
+    this.time.addEvent({
+      delay:650,loop:true,callback:()=>{
+        if(!this.active)return;
+        const lane=Phaser.Math.Between(0,2);
+        const mn=this.add.circle(myX[lane],90,16,laneColors[lane]); mn.lane=lane; this.myNotes.push(mn);
+        const rl=Phaser.Math.Between(0,2);
+        const rn=this.add.circle(rvX[rl],90,16,laneColors[rl],0.6); rn.lane=rl; this.rivalNotes.push(rn);
+      }
+    });
+
+    // Rival AI taps
+    this.time.addEvent({
+      delay:80,loop:true,callback:()=>{
+        if(!this.active)return;
+        const hit=this.rivalNotes.find(n=>Math.abs(n.y-this.hitY)<55);
+        if(hit&&Math.random()<0.78){
+          this.rivalScore+=10; this.rivalScoreTxt.setText(this.rivalScore);
+          this.rivalZones[hit.lane].setFillStyle(laneColors[hit.lane],0.85);
+          this.time.delayedCall(100,()=>this.rivalZones[hit.lane].setFillStyle(laneColors[hit.lane],0.15));
+          hit.destroy(); this.rivalNotes=this.rivalNotes.filter(n=>n!==hit);
+        }
+      }
+    });
+
+    this.time.addEvent({
+      delay:1000,loop:true,callback:()=>{
+        if(!this.active)return;
+        this.timeLeft--; this.timerTxt.setText(this.timeLeft);
+        if(this.timeLeft<=5)this.timerTxt.setColor('#ff4466');
+        if(this.timeLeft<=0)this.endBattle();
+      }
+    });
+
+    this.add.text(W*0.25,H-40,'TAP CIRCLES or Z X C',{fontSize:'9px',fontFamily:'Arial,sans-serif',color:'#2a2a3e'}).setOrigin(0.5);
+  }
+
+  myTap(lane) {
+    if(!this.active)return;
+    const laneColors=[0xFFD700,0x4488ff,0x00ff88];
+    const hit=this.myNotes.find(n=>n.lane===lane&&Math.abs(n.y-this.hitY)<58);
+    if(hit){
+      this.myScore+=10; this.myScoreTxt.setText(this.myScore);
+      this.myZones[lane].setFillStyle(laneColors[lane],0.9);
+      this.time.delayedCall(100,()=>this.myZones[lane].setFillStyle(laneColors[lane],0.3));
+      const pop=this.add.text(hit.x,hit.y,'+10',{fontSize:'13px',fontFamily:'monospace',color:'#FFD700'}).setOrigin(0.5);
+      this.tweens.add({targets:pop,y:hit.y-45,alpha:0,duration:400,onComplete:()=>pop.destroy()});
+      hit.destroy(); this.myNotes=this.myNotes.filter(n=>n!==hit);
+    }
+  }
+
+  update() {
+    if(!this.active)return;
+    this.myKeys.forEach((k,i)=>{ if(Phaser.Input.Keyboard.JustDown(k))this.myTap(i); });
+    const spd=4.5;
+    this.myNotes.forEach(n=>{ n.y+=spd; });
+    this.rivalNotes.forEach(n=>{ n.y+=spd; });
+    this.myNotes=this.myNotes.filter(n=>{ if(n.y>this.hitY+65){n.destroy();return false;}return true; });
+    this.rivalNotes=this.rivalNotes.filter(n=>{ if(n.y>this.hitY+65){n.destroy();return false;}return true; });
+  }
+
+  endBattle() {
+    if(!this.active)return;
+    this.active=false;
+    const W=this.scale.width,H=this.scale.height;
+    const won=this.myScore>=this.rivalScore;
+    this.add.rectangle(W/2,H/2,W,H,0x000000,0.8).setDepth(20);
+    this.add.text(W/2,H/2-95,won?'YOU WIN! 🔥':'GHOST WINS 👻',{fontSize:'32px',fontFamily:'Arial Black,Arial',color:won?'#FFD700':'#ff4466',letterSpacing:2}).setOrigin(0.5).setDepth(21);
+    this.add.text(W/2,H/2-45,`YOU: ${this.myScore}  vs  GHOST: ${this.rivalScore}`,{fontSize:'15px',fontFamily:'monospace',color:'#9090b0'}).setOrigin(0.5).setDepth(21);
+    this.add.text(W/2,H/2+10,won?'+$1,500 · +10 Street Cred · Ghost silenced':'Ghost gains 15 Rival Beats · -$200 morale',{fontSize:'12px',fontFamily:'Arial,sans-serif',color:'#e8e8f0',wordWrap:{width:W*0.75},align:'center'}).setOrigin(0.5).setDepth(21);
+    const btn=this.add.text(W/2,H/2+90,won?'[ CLAIM VICTORY ]':'[ TAKE THE L ]',{fontSize:'20px',fontFamily:'Arial Black,Arial',color:won?'#0a0a0f':'#ff4466',backgroundColor:won?'#FFD700':'#1a1a26',padding:{x:20,y:12}}).setOrigin(0.5).setDepth(21).setInteractive({useHandCursor:true});
+    btn.on('pointerdown',()=>_pClose({won,myScore:this.myScore,rivalScore:this.rivalScore}));
+    btn.on('pointerover',()=>btn.setStyle({color:won?'#0a0a0f':'#FFD700'}));
+    btn.on('pointerout',()=>btn.setStyle({color:won?'#0a0a0f':'#ff4466'}));
+  }
+}
+
+// ── LAUNCH WRAPPERS ───────────────────────────
+// Override collectTrack to launch studio mini-game first
+const _origCollectTrack = collectTrack;
+window.collectTrack = function() {
+  closeModal();
+  _pLaunch(StudioScene, result => {
+    const a = ACTIONS['record'];
+    G.streams   += Math.floor(a.streams * result.mult);
+    G.following += a.follow;
+    G.money     += a.money;
+    G.streetCred += a.cred || 0;
+    G.tracks    = Math.min(5, G.tracks + 1);
+    G.day       += 1;
+    G.actionCount += 1;
+    addXP(a.xp);
+    addToFeed(`🎵 Laid down Track ${G.tracks} — Grade ${result.grade} (${result.hits} hits, ×${result.combo} combo). +${fmtNum(Math.floor(a.streams*result.mult))} streams`);
+    updateStats();
+    toast(`🎵 Track ${G.tracks}/5 — Grade ${result.grade} · ${result.mult}× streams! ${G.tracks>=5?'Album ready to DROP!':5-G.tracks+' more to go.'}`, 'success');
+    if (G.actionCount % 3 === 0) setTimeout(triggerRandomEvent, 800);
+  });
+};
+
+// Override bookVenue to launch concert mini-game first
+window.bookVenue = function(name, fee, req) {
+  if (G.level < (req||1)) { toast(`Need Level ${req} to perform here`, 'error'); return; }
+  _pLaunch(ConcertScene, result => {
+    const follow_boost = Math.floor(fee * 0.8 * result.mult);
+    G.money     += Math.floor(fee * result.mult);
+    G.following += follow_boost;
+    G.streetCred += 5;
+    G.reputation += 3;
+    G.day += 1;
+    G.actionCount += 1;
+    addXP(60);
+    updateStats();
+    addToFeed(`🎤 Performed at ${name}. ${result.energy}% crowd energy · +$${Math.floor(fee*result.mult).toLocaleString()} · +${fmtNum(follow_boost)} fans`);
+    toast(`🎤 ${name} DONE! ${result.mult}× multiplier — $${Math.floor(fee*result.mult).toLocaleString()} earned`, 'success');
+    if (G.actionCount % 3 === 0) setTimeout(triggerRandomEvent, 900);
+  });
+};
+
+function launchBeatBattle() {
+  _pLaunch(BeatScene, result => {
+    if (result.won) {
+      G.money += 1500;
+      G.streetCred += 10;
+      G.rivalBeats = Math.max(0, (G.rivalBeats||0) - 3);
+      addToFeed(`⚔️ Beat battled DrizzyGhost and WON! ${result.myScore} vs ${result.rivalScore} · +$1,500 · Ghost silenced`);
+      toast('🔥 Beat battle WON! Ghost is shook.', 'success');
+    } else {
+      G.money = Math.max(0, G.money - 200);
+      G.rivalBeats = (G.rivalBeats||0) + 15;
+      addToFeed(`💀 Lost beat battle to DrizzyGhost. ${result.myScore} vs ${result.rivalScore} · -$200 morale`);
+      toast('👻 Ghost got you this time. Train harder.', 'error');
+    }
+    G.day += 1; G.actionCount += 1;
+    updateStats();
+    if (G.actionCount % 3 === 0) setTimeout(triggerRandomEvent, 800);
+  });
+}
 </script>
 </body>
 </html>
