@@ -4399,6 +4399,134 @@ function quickF2Ask(q){
   setTimeout(()=>{f2StopTyping();f2BotMsg(f2Match(q));},500);
 }
 
+/* ══════════════════════════════════════════════
+   AUDIO VISUALIZER — beat burst on track record
+══════════════════════════════════════════════ */
+(function initAudioViz(){
+  const canvas=document.getElementById('three-splash');
+  if(!canvas||typeof THREE==='undefined') return;
+
+  const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setClearColor(0x000000,0);
+
+  const scene=new THREE.Scene();
+  const cam=new THREE.PerspectiveCamera(60,canvas.clientWidth/canvas.clientHeight,0.1,100);
+  cam.position.z=4;
+
+  // existing background particles (keep them)
+  const bgGeo=new THREE.BufferGeometry();
+  const bgCount=120;
+  const bgPos=new Float32Array(bgCount*3);
+  for(let i=0;i<bgCount*3;i++) bgPos[i]=(Math.random()-0.5)*12;
+  bgGeo.setAttribute('position',new THREE.BufferAttribute(bgPos,3));
+  const bgMat=new THREE.PointsMaterial({color:0xffd700,size:0.04,transparent:true,opacity:0.5});
+  scene.add(new THREE.Points(bgGeo,bgMat));
+
+  // beat burst particles
+  const BURST=200;
+  const burstGeo=new THREE.BufferGeometry();
+  const burstPos=new Float32Array(BURST*3);
+  const burstVel=[];
+  burstGeo.setAttribute('position',new THREE.BufferAttribute(burstPos,3));
+  const burstMat=new THREE.PointsMaterial({color:0xffd700,size:0.12,transparent:true,opacity:0});
+  const burst=new THREE.Points(burstGeo,burstMat);
+  scene.add(burst);
+
+  let burstActive=false,burstT=0;
+  const burstDuration=2.5;
+
+  function triggerBurst(){
+    for(let i=0;i<BURST;i++){
+      const theta=Math.random()*Math.PI*2;
+      const phi=Math.random()*Math.PI;
+      const speed=0.5+Math.random()*2.5;
+      burstVel[i]={
+        x:Math.sin(phi)*Math.cos(theta)*speed,
+        y:Math.sin(phi)*Math.sin(theta)*speed,
+        z:Math.cos(phi)*speed
+      };
+      burstPos[i*3]=0;burstPos[i*3+1]=0;burstPos[i*3+2]=0;
+    }
+    burstGeo.attributes.position.needsUpdate=true;
+    burstMat.opacity=1;burstMat.color.setHex(0xffd700);
+    burstActive=true;burstT=0;
+  }
+
+  // resize
+  function resize(){
+    const W=canvas.clientWidth,H=canvas.clientHeight;
+    renderer.setSize(W,H,false);
+    cam.aspect=W/H;cam.updateProjectionMatrix();
+  }
+  new ResizeObserver(resize).observe(canvas);
+  resize();
+
+  let prevTime=performance.now();
+  function animate(){
+    requestAnimationFrame(animate);
+    const now=performance.now();
+    const dt=(now-prevTime)/1000;prevTime=now;
+
+    // rotate bg
+    bgMat.opacity=0.35+Math.sin(now*0.001)*0.15;
+
+    if(burstActive){
+      burstT+=dt;
+      const prog=burstT/burstDuration;
+      burstMat.opacity=Math.max(0,1-prog*prog);
+      const pos=burstGeo.attributes.position.array;
+      for(let i=0;i<BURST;i++){
+        pos[i*3]  +=burstVel[i].x*dt;
+        pos[i*3+1]+=burstVel[i].y*dt;
+        pos[i*3+2]+=burstVel[i].z*dt;
+        // gravity pull back
+        burstVel[i].x*=0.985;burstVel[i].y*=0.985;burstVel[i].z*=0.985;
+      }
+      burstGeo.attributes.position.needsUpdate=true;
+      // color shift gold -> pink as it fades
+      const r=1,g=1-prog*0.5,b=prog*0.5;
+      burstMat.color.setRGB(r,g,b);
+      if(prog>=1){burstActive=false;burstMat.opacity=0;}
+    }
+
+    renderer.render(scene,cam);
+  }
+  animate();
+
+  // hook into collectTrack
+  const _orig=window.collectTrack;
+  window.collectTrack=function(){
+    triggerBurst();
+    // Web Audio "record" click sound
+    try{
+      const ctx=new(window.AudioContext||window.webkitAudioContext)();
+      [0,0.06,0.12].forEach((t,i)=>{
+        const osc=ctx.createOscillator();
+        const gain=ctx.createGain();
+        osc.connect(gain);gain.connect(ctx.destination);
+        osc.frequency.value=440*(i+1);
+        gain.gain.setValueAtTime(0.18,ctx.currentTime+t);
+        gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+t+0.15);
+        osc.start(ctx.currentTime+t);osc.stop(ctx.currentTime+t+0.18);
+      });
+    }catch(e){}
+    if(_orig) _orig.apply(this,arguments);
+  };
+
+  // album drop = bigger burst + different color
+  const _origDrop=window.dropAlbum||window.collectAlbum;
+  if(_origDrop){
+    const dropFn=window.dropAlbum||window.collectAlbum;
+    const key=window.dropAlbum?'dropAlbum':'collectAlbum';
+    window[key]=function(){
+      burstMat.color.setHex(0xff69b4);
+      for(let i=0;i<3;i++) setTimeout(triggerBurst,i*400);
+      dropFn.apply(this,arguments);
+    };
+  }
+})();
+
 </script>
 
 
