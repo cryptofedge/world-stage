@@ -2499,8 +2499,8 @@ function doAction(key) {
   if (G.money < a.cost) { toast(`Need $${a.cost} for this!`, 'error'); return; }
   if (key === 'record') {
     const prompt = buildSunoPrompt();
-    const sunoUrl = `https://suno.com/create?prompt=${encodeURIComponent(prompt)}`;
-    try { window.open(sunoUrl, '_blank'); } catch(e) {}
+    const melaosUrl = `https://melaos-studios.onrender.com/studio?prompt=${encodeURIComponent(prompt)}`;
+    try { window.open(melaosUrl, '_blank'); } catch(e) {}
     showModal('record', { a, prompt });
     return;
   }
@@ -2763,7 +2763,7 @@ const LESSONS = {
     icon:'🤖', title:'AI Music Policy (October 2025)',
     body:`<p>On October 28, 2025, ASCAP, BMI, and SOCAN (Canada) released a joint policy statement on AI-generated music and PRO royalty eligibility.</p>
     <div class="modal-law-box">📜 <strong>The Joint Policy:</strong><br><br>• <strong>Partially AI-generated music:</strong> ELIGIBLE for PRO registration and royalties — as long as there is meaningful human creative contribution<br>• <strong>Fully AI-generated music:</strong> NOT ELIGIBLE for PRO royalties — no human authorship = no copyright protection<br><br>This aligns with the US Copyright Office's position that copyright requires human authorship.</div>
-    <p>This means: if you use AI tools (Suno, Udio, etc.) to help write or produce, but YOU are the creative force, your music can still be registered. But if you just type a prompt and call it your song — you can't register it, and you can't collect PRO royalties.</p>
+    <p>This means: if you use AI tools (MELAOS STUDIOS, Udio, etc.) to help write or produce, but YOU are the creative force, your music can still be registered. But if you just type a prompt and call it your song — you can't register it, and you can't collect PRO royalties.</p>
     <div class="modal-law-box">⚠️ <strong>Game Impact:</strong> Any track labeled "AI-Generated" in SIGNED cannot be registered with ASCAP, BMI, or any PRO. It also cannot receive mechanical royalties via The MLC.</div>`
   }
 };
@@ -2843,15 +2843,15 @@ function showModal(type, data) {
   if (type === 'record') {
     const a = data.a;
     const prompt = data.prompt || buildSunoPrompt();
-    const sunoUrl = `https://suno.com/create?prompt=${encodeURIComponent(prompt)}`;
+    const melaosUrl = `https://melaos-studios.onrender.com/studio?prompt=${encodeURIComponent(prompt)}`;
     html = `
       <div class="modal-icon">🎙️</div>
-      <div class="modal-title">SUNO STUDIO</div>
+      <div class="modal-title">MELAOS STUDIOS</div>
       <div class="modal-body">
-        <p>Your track prompt is ready. If Suno didn't open automatically, tap the button below:</p>
-        <a href="${sunoUrl}" target="_blank" style="display:block;margin:10px 0;padding:10px;background:var(--accent);color:#000;border-radius:8px;text-align:center;font-weight:700;text-decoration:none;">🎵 OPEN SUNO →</a>
+        <p>Your track prompt is ready. MELAOS STUDIOS is opening — powered by <strong>Eclat Universe</strong>.</p>
+        <a href="${melaosUrl}" target="_blank" style="display:block;margin:10px 0;padding:12px;background:linear-gradient(135deg,#F28C28,#AE06ED);color:#fff;border-radius:8px;text-align:center;font-weight:700;text-decoration:none;letter-spacing:1px;">🎵 OPEN MELAOS STUDIOS →</a>
         <div class="modal-law-box" style="font-family:monospace;font-size:11px;word-break:break-word;margin-top:8px;">"${prompt}"</div>
-        <p style="margin-top:12px;font-size:13px;">Make your track, then come back and collect your rewards.</p>
+        <p style="margin-top:12px;font-size:13px;">Make your track in MELAOS STUDIOS, then come back and collect your rewards.</p>
       </div>
       <div class="modal-rewards">+$${a.money.toLocaleString()} · +${fmtNum(a.streams)} streams · +${fmtNum(a.follow)} followers · +${a.xp} XP</div>
       <button class="modal-btn" onclick="collectTrack()">🎵 I MADE MY TRACK</button>`;
@@ -4339,7 +4339,7 @@ const F2_KB = [
   {k:['how','play','start','rules','basics','what is'],a:"World Stage is a music industry RPG. You create an artist, pick a genre and city, then grow your career through daily actions \u2014 recording tracks, dropping albums, booking venues, negotiating deals, and navigating industry events. Every action costs 1 day. Your stats: money, streams, following, Drip Score, Street Cred, and Reputation. \ud83c\udfb5"},
   {k:['genre','city','region','style','pick'],a:"At creation you pick:\n\n\ud83c\udfb5 Genre \u2014 Afrobeats, Drill, Trap, R&B, Latin, Pop, Reggaeton\n\ud83c\udfd9\ufe0f City \u2014 NYC, Lagos, London, Atlanta, Miami, LA, Toronto\n\ud83c\udf0d Region \u2014 North America, Africa, Europe, Latin America\n\nYour genre affects your default fanbase. Your city affects your Street Cred and venue access. Pick what fits your artist's vision."},
   {k:['stats','money','streams','followers','drip','street cred','reputation','xp'],a:"Your career stats:\n\n\ud83d\udcb0 Money \u2014 your cash balance for expenses and investments\n\ud83d\udcca Streams \u2014 total song plays across platforms\n\ud83d\udc65 Following \u2014 your social media/fan base size\n\ud83d\udc57 Drip Score \u2014 your style and fashion presence\n\ud83c\udfd9\ufe0f Street Cred \u2014 your local/underground reputation\n\u2b50 Reputation \u2014 industry-wide clout\n\ud83c\udf1f XP/Level \u2014 career progression metric"},
-  {k:['album','track','record','studio','song','music'],a:"You build albums 5 tracks at a time. Record individual tracks in the Career tab, then when you have 5+, hit DROP IT to release the album. Dropping triggers confetti, a big stats boost, and automatically posts to your social feed. Albums stack your streams permanently. \ud83c\udfb5"},
+  {k:['album','track','record','studio','song','music'],a:"You build albums 5 tracks at a time. Record individual tracks in the Career tab \u2014 each one opens MELAOS STUDIOS (melaos-studios.onrender.com), the official Eclat Universe studio. When you have 5+, hit DROP IT to release the album. Dropping triggers confetti, a big stats boost, and automatically posts to your social feed. \ud83c\udfb5"},
   {k:['venue','book','concert','performance','crowd'],a:"Book venues in the Venues tab. Each venue has a capacity requirement \u2014 Small Venue \u2192 Theater \u2192 Arena \u2192 Stadium \u2192 World Stage. You need matching Street Cred and Reputation to book bigger spots. Performances give money, following, and street cred. The crowd bounce animation shows turnout. \ud83c\udfa4"},
   {k:['npc','keisha','drizzyghost','izzy','big lou','rival','character'],a:"4 NPCs shape your career:\n\n\ud83c\udfa7 Keisha T. \u2014 A&R rep who offers label deals\n\ud83d\udc7b DrizzyGhost \u2014 your rival who snipes back at everything you do\n\ud83c\udfb5 Izzy Chen \u2014 Spotify curator who controls playlist placement\n\ud83c\udfaa Big Lou \u2014 venue promoter who books your shows\n\nEach NPC appears randomly. Their offers change based on your stats. \ud83c\udfaf"},
   {k:['event','industry event','bet','tiktok','viral','hot 97','nike','grammy','label'],a:"Industry events trigger every 3 actions. 10 possible events:\n\n\ud83d\udcfa BET Network shoot, \ud83d\udcf1 TikTok viral moment, \ud83c\udfa4 Rival diss response, \ud83d\udce7 Label DM offer, \ud83d\udcfb Hot 97 feature, \ud83d\udc5f Nike deal, \ud83c\udfc6 Grammy invitation, \ud83d\udcb0 Royalty check, \ud83e\udd1d Collab offer, \ud83d\udccb 360 deal\n\nSome events cost money, others pay. Read each one carefully before deciding. \ud83c\udfaf"},
